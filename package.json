@@ -1,0 +1,23 @@
+{
+  "name": "bamazon",
+  "version": "1.0.0",
+  "description": "Amazon-like storefront application.",
+  "main": "bamazonCustomer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/median-man/Bamazon.git"
+  },
+  "author": "John Desrosiers",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/median-man/Bamazon/issues"
+  },
+  "homepage": "https://github.com/median-man/Bamazon#readme",
+  "dependencies": {
+    "inquirer": "^3.3.0",
+    "mysql": "^2.14.1"
+  }
+}

@@ -66,7 +66,8 @@ var BamazonDB = (function(username, password) {
         );
     };
 
-    // Returns a promise.
+    // Returns a promise for the eventual update of the data. Passes
+    // the product id to .then callback.
     var updateQuantity = function(id, newQuantity) {
         // update query string
         var sql = "UPDATE " + tblProducts + " SET ? WHERE ?";
@@ -101,11 +102,3 @@ var BamazonDB = (function(username, password) {
 })();
 
 module.exports = BamazonDB;
-
-
-// test code
-
-BamazonDB.updateQuantity(5,2)
-    .then(BamazonDB.queryProducts, BamazonDB.close)
-    .then(console.log)
-    .then(BamazonDB.close);

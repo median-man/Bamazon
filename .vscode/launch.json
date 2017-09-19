@@ -5,7 +5,7 @@
                 "type": "node",
                 "request": "launch",
                 "name": "dataAccess",
-                "program": "${workspaceRoot}\\dataAccess.js"
+                "program": "${workspaceRoot}\\BamazonDB.js"
             },
             {
                 "type": "node",

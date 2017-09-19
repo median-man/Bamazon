@@ -8,19 +8,21 @@
 const mysql = require("mysql");
 const keys = require("./keys").bamazon_db;
 
+// configuration settings for the database
+const dbConfig = {
+    user: keys.username,
+    password: keys.password,
+    host: "localhost",
+    port: 3306,
+    database: "bamazon_DB",
+};
 
 // Create a class to provide an interface with the database
 // and immediately get an instance of the class
- var BamazonDB = (function(username, password) {
+var BamazonDB = (function(username, password) {
 
     // Create a connection to the bamazon db
-    var connection = mysql.createConnection({
-        host: "localhost",
-        port: 3306,        
-        user: username,
-        password: password,
-        database: "bamazon_DB"
-    });
+    var connection = mysql.createConnection(dbConfig);
 
     // Closes the database connection
     var close = function() {
@@ -30,6 +32,7 @@ const keys = require("./keys").bamazon_db;
     return {
         close: close
     };
- })(keys.username, keys.password);
+})();
 
- BamazonDB.close();
+// test code
+BamazonDB.close();

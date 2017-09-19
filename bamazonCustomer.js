@@ -16,21 +16,43 @@ const bamazonDb = require("./BamazonDB");
 
 (function run() {
 // ask user to enter the id of the product they would like to buy
+    var id = 5; // hard code id of 5 for testing (bacon bandaids)
 
-// ask the user how many of the item to buy
+    // ask the user how many of the item to buy
+    var qtyDesired = 2;
 
-// get the quantity of the product available
+    // scope the product data
+    var product;
 
-// if desired amount > quantity available ...
-// ... notify user of insufficient quantity
-
-// if there is enough available...
-// update quantity available
-// display cost of the purchase to the user
-
-// ask user to purchase another item or exit
-
-
+    // get the quantity of the product available
+    bamazonDb.queryProducts(id)
+        .then(function(data) {
+            product = data[0];
+            var qtyAvailable = product.stock_quantity;
+            // if desired amount > quantity available ...
+            if ( qtyDesired > qtyAvailable ) {
+                // ... notify user of insufficient quantity                
+                console.log("insufficient quantity");
+            
+            // if there is enough available...
+            } else {
+                // update quantity available
+                bamazonDb.updateQuantity(id, qtyAvailable - qtyDesired)
+                    .then(function() {
+                        // display total to user
+                        console.log("total:", qtyDesired * product.price);
+                    }
+                ).catch();
+            }
+        })
+        .then(function() {
+            bamazonDb.close(); // close db connection
+            
+            // ask user to purchase another item or exit
+            var continueShopping = false;
+            if (continueShopping) run();
+        })
+        .catch(console.log);
 })();
 
 

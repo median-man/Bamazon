@@ -20,6 +20,7 @@ const dbConfig = {
 // database constants
 const tblProducts = "products";
 const colProductID = "item_id";
+const colProductQuantity = "stock_quantity";
 
 // Create a class to provide an interface with the database
 // and immediately get an instance of the class
@@ -47,9 +48,11 @@ var BamazonDB = (function(username, password) {
             sql += " WHERE " + colProductID + " = " + id;
         }
         
+        // return a promise passing the result of the query
+        // to the callback on succesful query
         return new Promise(
             function(resolve, reject) {
-                // query the data base and pass values to
+                // query the database and pass values to
                 // promise callbacks
                 connection.query(sql, 
                     function(err, results) {
@@ -63,14 +66,46 @@ var BamazonDB = (function(username, password) {
         );
     };
 
+    // Returns a promise.
+    var updateQuantity = function(id, newQuantity) {
+        // update query string
+        var sql = "UPDATE " + tblProducts + " SET ? WHERE ?";
+        // update quantity of product
+        var values = {};
+        values[colProductQuantity] = newQuantity;
+        // query criteria
+        var criteria = {};
+        criteria[colProductID] = id;
+
+        // return a promise fo the update query
+        return new Promise(
+            function(resolve, reject) {
+                // run an update query
+                connection.query(sql, [values, criteria],
+                    function(err, results) {
+                        // run the error callback passing the err
+                        if (err) return reject(err);
+                        // pass the id to the callback
+                        resolve(id);
+                    }
+                );
+            }
+        );
+    };
+
     return {
         close: close,
-        queryProducts: queryProducts
+        queryProducts: queryProducts,
+        updateQuantity: updateQuantity
     };
 })();
 
-// test code
-BamazonDB.queryProducts(5).then(console.log);
-BamazonDB.close();
-
 module.exports = BamazonDB;
+
+
+// test code
+
+BamazonDB.updateQuantity(5,2)
+    .then(BamazonDB.queryProducts, BamazonDB.close)
+    .then(console.log)
+    .then(BamazonDB.close);

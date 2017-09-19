@@ -13,6 +13,7 @@
  */
 const inquirer = require("inquirer");
 const bamazonDb = require("./BamazonDB");
+const ui = require("./Cli"); // implement cmd line ui
 
 (function run() {
 // ask user to enter the id of the product they would like to buy

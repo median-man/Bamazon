@@ -19,6 +19,7 @@ const dbConfig = {
 
 // database constants
 const tblProducts = "products";
+const colProductID = "item_id";
 
 // Create a class to provide an interface with the database
 // and immediately get an instance of the class
@@ -33,9 +34,19 @@ var BamazonDB = (function(username, password) {
     };
 
     // Returns a promise. Passes query result to callback.
-    var queryProducts = function() {
+    // optional id paremeter looks up product by id
+    var queryProducts = function(id) {
         // sql command
         var sql = "SELECT * FROM " + tblProducts;
+        // escape sql key words
+        id = connection.escape(id);
+
+        // if an id argument was provided, update sql
+        // with a WHERE clause
+        if ( typeof id !== 'undefined' ) {
+            sql += " WHERE " + colProductID + " = " + id;
+        }
+        
         return new Promise(
             function(resolve, reject) {
                 // query the data base and pass values to
@@ -59,7 +70,7 @@ var BamazonDB = (function(username, password) {
 })();
 
 // test code
-BamazonDB.queryProducts().then(console.log);
+BamazonDB.queryProducts(5).then(console.log);
 BamazonDB.close();
 
 module.exports = BamazonDB;

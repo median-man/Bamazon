@@ -16,34 +16,39 @@ const bamazonDb = require("./BamazonDB");
 const ui = require("./Cli"); // implement cmd line ui
 
 (function run() {
-// ask user to enter the id of the product they would like to buy
-    var id = 5; // hard code id of 5 for testing (bacon bandaids)
-
-    // ask the user how many of the item to buy
-    var qtyDesired = 2;
-
-    // scope the product data
-    var product;
-
-    // get the quantity of the product available
-    bamazonDb.queryProducts(id)
+    var allProducts;
+    // get all available items from products table
+    bamazonDb.queryProducts()
         .then(function(data) {
-            product = data[0];
-            var qtyAvailable = product.stock_quantity;
-            // if desired amount > quantity available ...
-            if ( qtyDesired > qtyAvailable ) {
-                // ... notify user of insufficient quantity                
-                console.log("insufficient quantity");
+            allProducts = data;
+            // list6 all products to the user
+            console.log("all products:", allProducts);
+
+            // get user input for id and quantity
+            var id = 5;
+            var qtyDesired = 2;
             
-            // if there is enough available...
+            // get the selected product from the array
+            // of products
+            var product = allProducts.find(function(el) {
+                    return el.item_id === id;
+            });
+            if (!product) throw new Error("Invalid product id or id not found.");
+
+            // notify user if available quantity of the
+            // product is insufficient
+            if ( qtyDesired > product.stock_quantity ) {
+                console.log("insufficient quantity available");            
             } else {
-                // update quantity available
-                bamazonDb.updateQuantity(id, qtyAvailable - qtyDesired)
-                    .then(function() {
-                        // display total to user
+
+                // update the database for quantity available
+                bamazonDb.updateQuantity(id, product.stock_quantity - qtyDesired)
+                    .then(function(){
+                        
+                        // display transaction to user
                         console.log("total:", qtyDesired * product.price);
-                    }
-                ).catch();
+                    })
+                    .catch(console.log);
             }
         })
         .then(function() {

@@ -12,7 +12,7 @@
 *   Import Modules
  */
 const inquirer = require("inquirer");
-const mysql = require("mysql");
+const bamazonDb = require("./BamazonDB");
 
 (function run() {
 // ask user to enter the id of the product they would like to buy

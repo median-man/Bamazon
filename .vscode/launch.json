@@ -4,13 +4,20 @@
             {
                 "type": "node",
                 "request": "launch",
+                "name": "_bamazon",
+                "program": "${workspaceRoot}\\_bamazonCustomer.js",
+                "console": "integratedTerminal"
+            },
+            {
+                "type": "node",
+                "request": "launch",
                 "name": "dataAccess",
                 "program": "${workspaceRoot}\\BamazonDB.js"
             },
             {
                 "type": "node",
                 "request": "launch",
-                "name": "Launch Program",
+                "name": "bamazon",
                 "program": "${workspaceRoot}\\bamazonCustomer.js"
             }
         ]

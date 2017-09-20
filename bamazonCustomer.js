@@ -11,52 +11,69 @@
 /* 
 *   Import Modules
  */
-const inquirer = require("inquirer");
-const bamazonDb = require("./BamazonDB");
-const ui = require("./Cli"); // implement cmd line ui
+const BamazonDB = require("./BamazonDB");
+const Inquirer = require("inquirer");
+
+// close database connection and stop execution
+function quit() {
+    BamazonDB.close();
+    console.log("Good bye.");
+    process.exit();
+}
 
 (function run() {
+    // get all products
     var allProducts;
-    // get all available items from products table
-    bamazonDb.queryProducts()
+    BamazonDB.queryProducts()
         .then(function(data) {
             allProducts = data;
-            // list6 all products to the user
-            console.log("all products:", allProducts);
 
-            // get user input for id and quantity
-            var id = 5;
-            var qtyDesired = 2;
+            // list all products to the user
+            // console.log("all products:", allProducts);
+            UI.newPurchase(allProducts)
+                .then(function(input) {
+
+                    // quit application if id is Q
+                    if (input.id === "Q") return quit();
+
+                    // get user input for id and quantity
+                    var id = parseInt(input.id);
+                    var qtyDesired = parseInt(input.quantity);
+
+
+                    
+                    // get the selected product from the array
+                    // of products
+                    var product = allProducts.find(function(el) {
+                            return el.item_id === id;
+                    });
+                    if (!product) throw new Error("Invalid product id or id not found.");
+
+                    // notify user if available quantity of the
+                    // product is insufficient
+                    if ( qtyDesired > product.stock_quantity ) {
+                        return console.log("insufficient quantity available");            
+                    } else {
+
+                        // update the database for quantity available
+                        return BamazonDB.updateQuantity(id, product.stock_quantity - qtyDesired)
+                            .then(function(){
+                                
+                                // display transaction to user
+                                console.log("total:", qtyDesired * product.price);
+                            })
+                            .catch(console.log);
+                    }
+                })
+                .catch(console.log);
+
             
-            // get the selected product from the array
-            // of products
-            var product = allProducts.find(function(el) {
-                    return el.item_id === id;
-            });
-            if (!product) throw new Error("Invalid product id or id not found.");
-
-            // notify user if available quantity of the
-            // product is insufficient
-            if ( qtyDesired > product.stock_quantity ) {
-                console.log("insufficient quantity available");            
-            } else {
-
-                // update the database for quantity available
-                bamazonDb.updateQuantity(id, product.stock_quantity - qtyDesired)
-                    .then(function(){
-                        
-                        // display transaction to user
-                        console.log("total:", qtyDesired * product.price);
-                    })
-                    .catch(console.log);
-            }
         })
-        .then(function() {
-            bamazonDb.close(); // close db connection
-            
+        .then(function() {            
             // ask user to purchase another item or exit
             var continueShopping = false;
-            if (continueShopping) run();
+            if (continueShopping) return run();
+            return quit();
         })
         .catch(console.log);
 })();

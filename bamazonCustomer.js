@@ -100,7 +100,12 @@ function getPurchaseInput() {
             message : "How many?",
             
             // display question if user did not select quit
-            when    : function(answers) { return answers.choice !== 'Q'}
+            when    : function(answers) { return answers.choice !== 'Q'},
+
+            // quantity must be a number greater than or = 0
+            validate: function(input) {
+                return parseFloat(input) >= 0 || "Amount must be a number greater than 0.";
+            }
         }        
     ]);
 }
@@ -167,20 +172,27 @@ function run() {
             return getPurchaseInput();
         })
         .then(function(answers) {
-            // user wants to quit
+
+            // if user wants to quit, close db connection
             if ( answers.choice === "Q" ) {
-                connection.end();
-                return console.log("Good bye.");
-            } 
+                return connection.end(function(err) { 
+                    if (err) return handleError(err); 
+                    return console.log("Good bye.");
+                });
+            }
+            
+            // do nothing if quantity is 0
+            if ( !answers.quantity ) return run();
             
             // return user input
             handlePurchase({
                 id: answers.choice,
                 quantity: answers.quantity
             });
-        }).catch(console.log);
+        }).catch(handleError);
 }
 
+// Connect to the database and run the app
 connection.connect(function(err) {
     if (err) return handleError(err);
     run();

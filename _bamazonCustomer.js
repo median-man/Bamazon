@@ -4,6 +4,7 @@
 const Mysql = require("mysql");
 const Inquirer = require("inquirer");
 const Keys = require("./keys.json");
+const Table = require('cli-table');
 
 // product table instance
 var productTable;
@@ -21,23 +22,11 @@ var connection = Mysql.createConnection(
 
 // Class with properties and methods for interacting with and rendering product data
 function ProductTable(products) {
-    // column widths for listing products table data
-    const columnWidths = {
-        id      : 4,
-        item    : 50,
-        dept    : 10,
-        price   : 7,
-        qty     : 5
-    };
 
-    // headings for each column
-    const columnHeadings = {
-        id      : "Id",
-        item    : "Item",
-        dept    : "Dept",
-        price   : "Price",
-        qty     : "Qty"
-    };
+    var table = new Table({
+        head        : ["Id", "Item", "Dept", "Price", "Qty"],
+        colWidths   : [4,50,10,7,5]
+    });
 
     // array of products
     this.products = products;
@@ -54,52 +43,18 @@ function ProductTable(products) {
 
     // Returns a string representation of the table
     this.toString = function() {
-
-        // build an array of strings. one element for each row of data
-        var rows = [];
         this.products.forEach(function(element) {
-            rows.push(getRow(element));
+            table.push(
+                [
+                    element.item_id.toString(),
+                    element.product_name,
+                    element.department_name,
+                    element.price.toFixed(2),
+                    element.stock_quantity.toString()
+                ]
+            );
         });
-        return rows.join("\n");
-    }
-
-    // Returns a string for a row of product data.
-    function getRow(product) {
-
-        // get formatted strings for product values
-        var prodStr = {
-            id      : product.item_id.toString(),
-            item    : product.product_name,
-            dept    : product.department_name,
-            price   : product.price.toFixed(2),
-            qty     : product.stock_quantity.toString()
-        }
-
-        // concatenate a string for each value as a cell
-        return getCell(prodStr.id, columnWidths.id) +
-            getCell(prodStr.item, columnWidths.item) +
-            getCell(prodStr.dept, columnWidths.dept) +
-            getCell(prodStr.price, columnWidths.price) +
-            getCell(prodStr.qty, columnWidths.qty);
-    }
-
-    // Truncates or adds padding to the right to
-    // return a string wher length is equal to the
-    // width parameter. Optional pad value changes
-    // the sing character used for padding.
-    function getCell(val, width, pad = " ") {
-        val = val.toString();
-        if ( val.length < width ) {
-
-            // add padding and a single space 'border' to the right
-            return val + pad.repeat(width - val.length) + " ";
-        }
-
-        // truncate when length of val exceeds the column width and
-        // add a single space for a 'border'
-        else {
-            return val.substr(0, width) + " ";
-        }
+        return table.toString();
     }
 }
 
@@ -192,7 +147,6 @@ function handlePurchase(input) {
         );
     }
 }
-
 
 // Runs the customer application
 function run() {

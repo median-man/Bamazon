@@ -216,13 +216,13 @@ function handleError(err) {
 			"the server may have been configured to listen to a different port";
 		break;
 
-		// handle access to db denied
+	// handle access to db denied
 	case "ER_ACCESS_DENIED_ERROR":
 		errMessage = "Ivalid username or password. Please check your user name " +
 			"and password in the 'keys.json' file.";
 		break;
 		
-		// unhandled errors
+	// unhandled errors
 	default:
 		errMessage = unhandledError;
 		console.log(err);

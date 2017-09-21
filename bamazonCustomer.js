@@ -182,23 +182,41 @@ function run() {
 }
 
 connection.connect(function(err) {
-    if (err) handleError(err);
+    if (err) return handleError(err);
     run();
 });
 
 // Handling for all errors are directed to this function. Displays
 // a message to the user and closes the db connection.
 function handleError(err) {
+
+    // message to display when an unexpted error code is encountered
     const unhandledError = "An unexpected error has occurred. Please restart " +
         "the program. If the problem persists, you may need to re-install the application.";
+    
     var errMessage = "";
 
-    // handle unable to connect to database
-    if ( err.code === "ECONNREFUSED" ) {
-        errMessage = "Unable to connect to the Bamazon database. Good bye."
+    switch ( err.code ) {
+
+        // handle unable to connect to database
+        case "ECONNREFUSED":
+            errMessage = "Unable to connect to the Bamazon database. The server may be down or " +
+                "the server may have been configured to listen to a different port";
+            break;
+
+        // handle access to db denied
+        case "ER_ACCESS_DENIED_ERROR":
+            errMessage = "Ivalid username or password. Please check your user name " +
+                "and password in the 'keys.json' file.";
+            break;
+        
+        // unhandled errors
+        default:
+            errMessage = unhandledError;
+            console.log(err);
     }
-    errMessage = errMessage || unhandledError;
-    console.log("\n" + errMessage);
-    console.log(err);
+
     connection.end();
+    console.log("\n" + errMessage);
+    console.log("Good bye.");
 }

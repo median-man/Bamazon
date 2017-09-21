@@ -27,7 +27,7 @@ function ProductTable(products) {
     // configure table headers and styling
     var table = new Table({
         head        : ["Id", "Item", "Dept", "Price", "Qty"],
-        colWidths   : [4,50,10,7,5]
+        colWidths   : [4, 50, 10, 7, 5]
     });
 
     // array of products

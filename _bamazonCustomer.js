@@ -20,9 +20,11 @@ var connection = Mysql.createConnection(
     }
 );
 
-// Class with properties and methods for interacting with and rendering product data
+// Class with properties and methods for interacting with and rendering 
+// product data
 function ProductTable(products) {
 
+    // configure table headers and styling
     var table = new Table({
         head        : ["Id", "Item", "Dept", "Price", "Qty"],
         colWidths   : [4,50,10,7,5]
@@ -41,7 +43,8 @@ function ProductTable(products) {
         });
     }
 
-    // Returns a string representation of the table
+    // Returns a string representation of the table including
+    // borders and other formatting properties
     this.toString = function() {
         this.products.forEach(function(element) {
             table.push(

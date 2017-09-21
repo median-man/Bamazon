@@ -182,6 +182,23 @@ function run() {
 }
 
 connection.connect(function(err) {
-    if (err) throw err;
+    if (err) handleError(err);
     run();
 });
+
+// Handling for all errors are directed to this function. Displays
+// a message to the user and closes the db connection.
+function handleError(err) {
+    const unhandledError = "An unexpected error has occurred. Please restart " +
+        "the program. If the problem persists, you may need to re-install the application.";
+    var errMessage = "";
+
+    // handle unable to connect to database
+    if ( err.code === "ECONNREFUSED" ) {
+        errMessage = "Unable to connect to the Bamazon database. Good bye."
+    }
+    errMessage = errMessage || unhandledError;
+    console.log("\n" + errMessage);
+    console.log(err);
+    connection.end();
+}

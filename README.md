@@ -13,10 +13,8 @@ Bamazon lists products from a database to a user (customer). The customer may se
 5. Enter your username and password for the MySql server in the keys.json file.
 6. Start running the app from the terminal with the command "node bamazonCuster.js".
 
-## Demonstration
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=oivuUEn2sls
-" target="_blank"><img src="http://img.youtube.com/oivuUEn2sls/0.jpg" 
-alt="screen shot of Bamazon App" width="240" height="180" border="10" /></a>
+## Demonstration Video
+[![Screenshot of Bamazon Demo](http://img.youtube.com/vi/oivuUEn2sls/0.jpg)](http://www.youtube.com/watch?v=oivuUEn2sls)
 
 ## Author
 John Desrosiers

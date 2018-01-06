@@ -77,8 +77,8 @@ function getPurchaseInput(products) {
 
 // displays transaction info
 function showTransaction(product, quantity) {
-  console.log(`\nSuccessfully purchased ${quantity} of ${product.product_name
-  } for $${(product.price * quantity).toFixed(2)}.`);
+  console.log(`\nSuccessfully purchased ${quantity} of ${product.name} for ` +
+    `$${(product.price * quantity).toFixed(2)}.`);
 }
 
 // Records transaction if sufficient quantity of the selected
@@ -97,21 +97,13 @@ function handlePurchase(input) {
       } else {
         // update the quantity of the item in the database
         const newQty = product.quantity - input.quantity;
-        const query = 'UPDATE products SET ? WHERE ?';
-        connection.query(
-          query,
-          [
-            { stock_quantity: newQty },
-            { item_id: input.id },
-          ],
-          (err) => {
-            if (err) throw err;
-
-            // display transaction
+        db
+          .updateProductQty(input.id, newQty)
+          .then(() => {
             showTransaction(product, input.quantity);
             run();
-          },
-        );
+          })
+          .catch((err) => { throw err; });
       }
     });
 }

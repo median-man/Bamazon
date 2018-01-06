@@ -1,4 +1,5 @@
 const { expect } = require('chai');
+const mysql = require('mysql');
 const configs = require('../db/config.json');
 const BamazonDB = require('../src/BamazonDB.js');
 
@@ -53,6 +54,7 @@ function initTestDb(connection, cb) {
   runQueries(connection, [createProductTblSql, seedProductTblSql], cb);
 }
 
+
 describe('BamazonDB', function () {
   let testDb;
   beforeEach(function initializeDB(done) {
@@ -60,15 +62,16 @@ describe('BamazonDB', function () {
     initTestDb(testDb.connection, () => done());
   });
   afterEach(function closeDbConnection(done) {
-    testDb.connection.end();
+    if (testDb.connection.state !== 'disconnected') testDb.connection.end();
     done();
   });
   it('has a connection', function () {
     expect(testDb.connection).to.be.an('object');
   });
-  it('responds responds to getTable and getProductById', function () {
+  it('responds responds to getTable, getProductById, and updateProductQty', function () {
     expect(testDb).to.respondTo('getTable');
     expect(testDb).to.respondTo('getProductById');
+    expect(testDb).to.respondTo('updateProductQty');
   });
 
   describe('#constructor', function () {
@@ -99,7 +102,7 @@ describe('BamazonDB', function () {
 
   describe('getProductById', function () {
     it('returns a promise', function () {
-      expect(testDb.getProductById()).to.be.a('promise');
+      expect(testDb.getProductById(1)).to.be.a('promise');
     });
     it('eventually returns a product object', function (done) {
       testDb
@@ -114,7 +117,7 @@ describe('BamazonDB', function () {
     function testGetProductById(id, expectedProduct) {
       const product = expectedProduct;
       product.id = id;
-      it(`eventually returns ${JSON.stringify(product)} when id parameter is ${id}`, function (done) {
+      it(`eventually returns a product object from the database when id parameter is ${id}`, function (done) {
         testDb
           .getProductById(id)
           .then((data) => {
@@ -126,5 +129,31 @@ describe('BamazonDB', function () {
     }
     testGetProductById(1, testProducts[0]);
     testGetProductById(2, testProducts[1]);
+  });
+
+  describe('updateProductQty', function () {
+    it('returns a promise', function () {
+      expect(testDb.updateProductQty(1, 1)).to.be.a('promise');
+    });
+    function describeResult(id, newQty) {
+      describe(`when the id is ${id} and the newQty is ${newQty}`, function () {
+        it(`eventually updates the stock_quantity to ${newQty} for the row where the id = ${id}`, function (done) {
+          testDb
+            .updateProductQty(id, newQty)
+            .then(() => {
+              testDb.connection.end();
+              const testConnection = mysql.createConnection(configs.test);
+              testConnection.query(`SELECT stock_quantity FROM products WHERE item_id = ${id}`, (err, res) => {
+                if (err) throw err;
+                expect(res[0].stock_quantity).to.equal(newQty);
+                done();
+              });
+            })
+            .catch(done);
+        });
+      });
+    }
+    describeResult(1, 1);
+    describeResult(1, 20);
   });
 });

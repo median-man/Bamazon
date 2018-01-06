@@ -1,0 +1,130 @@
+const { expect } = require('chai');
+const configs = require('../db/config.json');
+const BamazonDB = require('../src/BamazonDB.js');
+
+const testProducts = [
+  {
+    name: 'Nostalgia Electrics BSET100CR 3 in 1 Breakfast Station',
+    dept: 'Home',
+    price: 69.99,
+    quantity: 3,
+  },
+  {
+    name: 'The AB Hancer',
+    dept: 'Sports',
+    price: 30.00,
+    quantity: 300,
+  },
+];
+
+// executes a query on a connection for each query in an array. throws if an
+// err is passed to the callback for the query. Once all queries are complete
+// executes optional callback function
+function runQueries(connection, queries, cb) {
+  let completedQueries = 0;
+  queries.forEach((query) => {
+    connection.query(query, (err) => {
+      if (err) throw err;
+      completedQueries += 1;
+      if (cb && completedQueries === queries.length) cb();
+    });
+  });
+}
+function initTestDb(connection, cb) {
+  const productToSql = product => `("${product.name}", "${product.dept}", ${product.price}, ` +
+    `${product.quantity})`;
+
+  const productsTableName = 'products';
+  const createProductTblSql =
+    'CREATE TABLE products(' +
+    'item_id INT NOT NULL AUTO_INCREMENT,' +
+    'product_name VARCHAR(100) NOT NULL,' +
+    'department_name VARCHAR(45) NOT NULL,' +
+    'price DECIMAL(7,2) default 0,' +
+    'stock_quantity INT default 0,' +
+    'PRIMARY KEY (item_id));';
+  const seedProductTblSql =
+    'INSERT INTO' +
+      ' products(product_name, department_name, price, stock_quantity)' +
+      ` VALUES ${productToSql(testProducts[0])}, ${productToSql(testProducts[1])}`;
+
+  // reset the products table and seed it
+  runQueries(connection, [`DROP TABLE IF EXISTS ${productsTableName}`]);
+  runQueries(connection, [createProductTblSql, seedProductTblSql], cb);
+}
+
+describe('BamazonDB', function () {
+  let testDb;
+  beforeEach(function initializeDB(done) {
+    testDb = new BamazonDB(configs.test);
+    initTestDb(testDb.connection, () => done());
+  });
+  afterEach(function closeDbConnection(done) {
+    testDb.connection.end();
+    done();
+  });
+  it('has a connection', function () {
+    expect(testDb.connection).to.be.an('object');
+  });
+  it('responds responds to getTable and getProductById', function () {
+    expect(testDb).to.respondTo('getTable');
+    expect(testDb).to.respondTo('getProductById');
+  });
+
+  describe('#constructor', function () {
+    it('defaults to the dev database config if no config argument is passed', function () {
+      const db = new BamazonDB();
+      expect(db.connection.config.database).to.equal(configs.dev.database);
+    });
+    it('sets the connection database from the config parameter', function () {
+      expect(testDb.connection.config.database, 'connection.config.database')
+        .to.equal(configs.test.database);
+    });
+  });
+
+  describe('getTable', function () {
+    it('returns a promise', function () {
+      expect(testDb.getTable()).to.be.a('promise');
+    });
+    it('eventually returns an array for all the rows of the products table', function (done) {
+      testDb
+        .getTable()
+        .then((data) => {
+          expect(data.length).to.equal(testProducts.length);
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('getProductById', function () {
+    it('returns a promise', function () {
+      expect(testDb.getProductById()).to.be.a('promise');
+    });
+    it('eventually returns a product object', function (done) {
+      testDb
+        .getProductById(1)
+        .then((data) => {
+          expect(data).to.be.an('object')
+            .that.includes.all.keys('name', 'dept', 'price', 'quantity', 'id');
+          done();
+        })
+        .catch(done);
+    });
+    function testGetProductById(id, expectedProduct) {
+      const product = expectedProduct;
+      product.id = id;
+      it(`eventually returns ${JSON.stringify(product)} when id parameter is ${id}`, function (done) {
+        testDb
+          .getProductById(id)
+          .then((data) => {
+            expect(data).to.be.deep.equal(product);
+            done();
+          })
+          .catch(done);
+      });
+    }
+    testGetProductById(1, testProducts[0]);
+    testGetProductById(2, testProducts[1]);
+  });
+});

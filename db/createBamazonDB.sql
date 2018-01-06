@@ -1,4 +1,4 @@
--- SQL to create the Bamazon database and populate the products table
+-- script to create the Bamazon database and tables
 DROP DATABASE IF EXISTS bamazon_DB;
 CREATE DATABASE bamazon_DB;
 
@@ -12,6 +12,3 @@ CREATE TABLE products(
   stock_quantity INT default 0,
   PRIMARY KEY (item_id)
 );
-
-
-

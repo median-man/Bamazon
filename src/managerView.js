@@ -1,5 +1,5 @@
 const inquirer = require('inquirer');
-const { findProduct } = require('./customerView.js');
+const { findProduct, printToConsole, renderProducts } = require('./customerView.js');
 
 function padStart(value, len) {
   let result = value;
@@ -114,6 +114,11 @@ function addInventory(products) {
       return { id, newQuantity };
     });
 }
+
+function renderInventoryUpdate(product) {
+  renderProducts([product]);
+  printToConsole('Item succesfully updated!');
+}
 module.exports = {
-  addInventory, getProductList, mainMenu, validateQuantity,
+  addInventory, getProductList, mainMenu, renderInventoryUpdate, validateQuantity,
 };

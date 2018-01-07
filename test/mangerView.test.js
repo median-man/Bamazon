@@ -35,7 +35,7 @@ describe('managerView', function () {
       });
     });
   });
-  describe.only('validateQuantity', function () {
+  describe('validateQuantity', function () {
     const { validateQuantity } = managerView;
     function expectWhen(quantity, type) {
       describe(`when quantity argument is ${quantity}`, function () {

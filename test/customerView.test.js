@@ -2,6 +2,22 @@ const { expect } = require('chai');
 const customerView = require('../src/customerView.js');
 
 describe('customerView', function () {
+  const productData = [
+    {
+      item_id: 11,
+      product_name: 'Cupcake',
+      department_name: 'Health',
+      price: 3.99,
+      stock_quantity: 628,
+    },
+    {
+      item_id: 2,
+      product_name: 'Brownie',
+      department_name: 'Sweets',
+      price: 2.27,
+      stock_quantity: 452,
+    },
+  ];
   function itHasMethod(method) {
     it(`has a ${method} method`, function () {
       expect(customerView, 'customerView').to.respondTo(method);
@@ -9,25 +25,13 @@ describe('customerView', function () {
   }
   [
     'createProductTable',
+    'getPurchaseInput',
+    'printToConsole',
+    'renderProducts',
+    'renderTransaction',
   ].forEach(itHasMethod);
 
-  describe('createProductTable', () => {
-    const productData = [
-      {
-        item_id: 11,
-        product_name: 'Cupcake',
-        department_name: 'Health',
-        price: 3.99,
-        stock_quantity: 628,
-      },
-      {
-        item_id: 2,
-        product_name: 'Brownie',
-        department_name: 'Sweets',
-        price: 2.27,
-        stock_quantity: 452,
-      },
-    ];
+  describe('createProductTable', function () {
     const { createProductTable } = customerView;
     let result;
     before(function () {
@@ -45,4 +49,5 @@ describe('customerView', function () {
     }
     productData.forEach(testResult);
   });
+
 });

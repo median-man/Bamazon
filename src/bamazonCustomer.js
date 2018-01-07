@@ -6,61 +6,23 @@ const Table = require('cli-table');
 const BamazonDB = require('./BamazonDB.js');
 const customerView = require('./customerView.js');
 
+const { printToConsole } = customerView;
+
 // create a connection to the Bamazon database
 const db = new BamazonDB();
 const { connection } = db;
-
-// Prompt user for item to purchase and quantity or to
-// quit application
-function getPurchaseInput(products) {
-  // return prompt
-  return Inquirer.prompt([
-    {
-      name: 'choice',
-      type: 'input',
-      message: 'Enter the ID for the item you would like to ' +
-        "purchase or 'Q' to quit:",
-
-      // ensure there is a product with entered id
-      validate(input) {
-        const inputInt = parseInt(input, 10);
-        if (products.find(product => product.item_id === inputInt)) return true;
-        if (input === 'Q') return true;
-        return `${input} is not a valid choice.`;
-      },
-    },
-    {
-      name: 'quantity',
-      type: 'input',
-      message: 'How many?',
-
-      // display question if user did not select quit
-      when(answers) { return answers.choice !== 'Q'; },
-
-      // quantity must be a number greater than or = 0
-      validate(input) {
-        return parseFloat(input) >= 0 || 'Amount must be a number greater than 0.';
-      },
-    },
-  ]);
-}
-
-// displays transaction info
-function showTransaction(product, quantity) {
-  console.log(`\nSuccessfully purchased ${quantity} of ${product.name} for ` +
-    `$${(product.price * quantity).toFixed(2)}.`);
-}
 
 // Records transaction if sufficient quantity of the selected
 // item is available
 function handlePurchase(input) {
   // get the product
-  db.getProductById(parseInt(input.id, 10))
+  db
+    .getProductById(parseInt(input.id, 10))
     .then((product) => {
       // check availability
       if (input.quantity > product.quantity) {
         // there isn't enough available. notify user and return
-        console.log('\nInsufficient quantity Choose something else.');
+        printToConsole('\nInsufficient quantity Choose something else.');
         run();
 
       // update database and display transaction summary to the user
@@ -70,7 +32,7 @@ function handlePurchase(input) {
         db
           .updateProductQty(input.id, newQty)
           .then(() => {
-            showTransaction(product, input.quantity);
+            customerView.renderTransaction(product, input.quantity);
             run();
           })
           .catch((err) => { throw err; });
@@ -103,12 +65,12 @@ function handleError(err) {
       // unhandled errors
     default:
       errMessage = unhandledError;
-      console.log(err);
+      console.error(err);
   }
 
   connection.end();
-  console.log(`\n${errMessage}`);
-  console.log('Good bye.');
+  printToConsole(`\n${errMessage}`);
+  printToConsole('Good bye.');
 }
 
 // Runs the customer application
@@ -117,19 +79,17 @@ function run() {
   // instantiate productTable
   return db.getTable()
     .then((data) => {
-      // create a new instance of ProductTable and display it
-      // productTable = new ProductTable(data);
-      console.log(`\n\n${customerView.createProductTable(data)}`);
+      customerView.renderProducts(data);
 
       // get user input
-      return getPurchaseInput(data);
+      return customerView.getPurchaseInput(data);
     })
     .then((answers) => {
       // if user wants to quit, close db connection
       if (answers.choice === 'Q') {
         return db.connection.end((err) => {
           if (err) return handleError(err);
-          return console.log('Good bye.');
+          return printToConsole('Good bye.');
         });
       }
 

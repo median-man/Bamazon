@@ -1,23 +1,8 @@
 const { expect } = require('chai');
 const customerView = require('../src/customerView.js');
+const productData = require('./productData.json');
 
 describe('customerView', function () {
-  const productData = [
-    {
-      item_id: 11,
-      product_name: 'Cupcake',
-      department_name: 'Health',
-      price: 3.99,
-      stock_quantity: 10,
-    },
-    {
-      item_id: 2,
-      product_name: 'Brownie',
-      department_name: 'Sweets',
-      price: 2.27,
-      stock_quantity: 452,
-    },
-  ];
   function itHasMethod(method) {
     it(`has a ${method} method`, function () {
       expect(customerView, 'customerView').to.respondTo(method);

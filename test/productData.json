@@ -1,0 +1,16 @@
+[
+  {
+    "item_id": 11,
+    "product_name": "Cupcake",
+    "department_name": "Health",
+    "price": 3.99,
+    "stock_quantity": 10
+  },
+  {
+    "item_id": 2,
+    "product_name": "Brownie",
+    "department_name": "Sweets",
+    "price": 2.27,
+    "stock_quantity": 452
+  }
+]

@@ -90,6 +90,7 @@ function getPurchaseInput(products) {
 }
 module.exports = {
   createProductTable,
+  findProduct,
   getPurchaseInput,
   printToConsole,
   renderProducts,

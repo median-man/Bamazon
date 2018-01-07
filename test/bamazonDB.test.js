@@ -174,15 +174,17 @@ describe('BamazonDB', function () {
         return newProduct;
       });
       const expectedLength = isEmpty ? 0 : products.length;
-      initializeDB(() => {
-        testDb
-          .getLowInventory()
-          .then((data) => {
-            expect(data).to.be.an('array').with.lengthOf(expectedLength);
-            done();
-          })
-          .catch(done);
-      }, products);
+      testDb.connection.end(() => {
+        initializeDB(() => {
+          testDb
+            .getLowInventory()
+            .then((data) => {
+              expect(data).to.be.an('array').with.lengthOf(expectedLength);
+              done();
+            })
+            .catch(done);
+        }, products);
+      });
     }
     it('returns an empty array when all products have an inventory greater than 5', function (done) {
       testGetLowInventory(6, true, done);

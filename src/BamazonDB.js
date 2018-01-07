@@ -3,7 +3,7 @@ const devConfig = require('../db/config.json').dev;
 
 // wraps a mysql query in a promise and returns it
 function queryPromise(connection, sql, values) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     connection.query(sql, values, (err, result) => {
       if (err) throw err;
       resolve(result);
@@ -17,16 +17,7 @@ function BamazonDB(config = devConfig) {
 }
 
 BamazonDB.prototype.getTable = function getTable() {
-  return new Promise(((resolve, reject) => {
-    // get all product data from db
-    const sql = 'SELECT * FROM products';
-    this.connection.query(sql, (err, res) => {
-      if (err) return reject(err);
-
-      // run callback
-      return resolve(res);
-    });
-  }));
+  return queryPromise(this.connection, 'SELECT * FROM products');
 };
 
 BamazonDB.prototype.getProductById = function getProductById(id) {

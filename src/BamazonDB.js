@@ -36,9 +36,13 @@ BamazonDB.prototype.getProductById = function getProductById(id) {
 };
 
 BamazonDB.prototype.updateProductQty = function updateProductQtyById(id, newQty) {
-  console.log(newQty)
   const sql = 'UPDATE products SET stock_quantity=? WHERE item_id=?';
   return queryPromise(this.connection, sql, [newQty, id]);
+};
+
+BamazonDB.prototype.getLowInventory = function getProductsWithLowInventory() {
+  const sql = 'SELECT * FROM products WHERE stock_quantity<=5';
+  return queryPromise(this.connection, sql);
 };
 
 module.exports = BamazonDB;

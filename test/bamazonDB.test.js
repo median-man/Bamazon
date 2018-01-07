@@ -21,19 +21,19 @@ describe('BamazonDB', function () {
   let testDb;
   const testProducts = [
     {
-      product_name: 'Nostalgia Electrics BSET100CR 3 in 1 Breakfast Station',
-      department_name: 'Home',
-      price: 69.99,
-      stock_quantity: 3,
+      product_name: 'The Bobcat Mullet',
+      department_name: 'Accessories',
+      price: 9.99,
+      stock_quantity: 6,
     },
     {
       product_name: 'The AB Hancer',
       department_name: 'Sports',
       price: 30.00,
-      stock_quantity: 300,
+      stock_quantity: 5,
     },
   ];
-  beforeEach(function initializeDB(done) {
+  function initializeDB(done, products = testProducts) {
     testDb = new BamazonDB(configs.test);
 
     const productToSql = product => `("${product.product_name}", "${product.department_name}", ${product.price}, ` +
@@ -52,13 +52,14 @@ describe('BamazonDB', function () {
     const seedProductTblSql =
       'INSERT INTO ' +
         'products(product_name, department_name, price, stock_quantity) ' +
-      `VALUES ${productToSql(testProducts[0])}, ${productToSql(testProducts[1])}`;
+      `VALUES ${productToSql(products[0])}, ${productToSql(products[1])}`;
 
     // reset the products table and seed it
     runQueries(testDb.connection, [`DROP TABLE IF EXISTS ${productsTableName}`]);
     runQueries(testDb.connection, [createProductTblSql, seedProductTblSql], done);
     // initTestDb(testDb.connection, () => done());
-  });
+  }
+  beforeEach(initializeDB);
   afterEach(function closeDbConnection(done) {
     if (testDb.connection.state !== 'disconnected') testDb.connection.end();
     done();
@@ -163,5 +164,31 @@ describe('BamazonDB', function () {
     }
     describeResult(1, 1);
     describeResult(1, 20);
+  });
+
+  describe('getLowInventory', function () {
+    function testGetLowInventory(quantity, isEmpty, done) {
+      const products = testProducts.map((product) => {
+        const newProduct = Object.assign({}, product);
+        newProduct.stock_quantity = quantity;
+        return newProduct;
+      });
+      const expectedLength = isEmpty ? 0 : products.length;
+      initializeDB(() => {
+        testDb
+          .getLowInventory()
+          .then((data) => {
+            expect(data).to.be.an('array').with.lengthOf(expectedLength);
+            done();
+          })
+          .catch(done);
+      }, products);
+    }
+    it('returns an empty array when all products have an inventory greater than 5', function (done) {
+      testGetLowInventory(6, true, done);
+    });
+    it('returns an array of two products there are two products with an inventory of 5 or less', function (done) {
+      testGetLowInventory(5, false, done);
+    });
   });
 });

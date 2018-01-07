@@ -57,7 +57,6 @@ describe('BamazonDB', function () {
     // reset the products table and seed it
     runQueries(testDb.connection, [`DROP TABLE IF EXISTS ${productsTableName}`]);
     runQueries(testDb.connection, [createProductTblSql, seedProductTblSql], done);
-    // initTestDb(testDb.connection, () => done());
   }
   beforeEach(initializeDB);
   afterEach(function closeDbConnection(done) {
@@ -191,6 +190,68 @@ describe('BamazonDB', function () {
     });
     it('returns an array of two products there are two products with an inventory of 5 or less', function (done) {
       testGetLowInventory(5, false, done);
+    });
+  });
+
+  describe('addProduct', function () {
+    let validTestProduct;
+    before(function () {
+      validTestProduct = Object.assign({}, {
+        product_name: 'Magic Acorns',
+        department_name: 'Magic',
+        price: 23.99,
+        stock_quantity: 2,
+      });
+    });
+    it('is a function', function () {
+      expect(testDb.addProduct).to.be.a('function');
+    });
+    it('returns a promise', function () {
+      expect(testDb.addProduct(validTestProduct)).to.be.a('promise');
+    });
+    describe('when the product parameter is valid', function () {
+      let data;
+      let result;
+      beforeEach(function (done) {
+        function handleQueryResponse(err, response) {
+          if (err) done(err);
+          [data] = response;
+          done();
+        }
+        testDb
+          .addProduct(validTestProduct)
+          .then((res) => {
+            result = res;
+            testDb
+              .connection
+              .query(
+                'SELECT * FROM products WHERE product_name = ?',
+                [validTestProduct.product_name],
+                handleQueryResponse,
+              );
+          })
+          .catch(done);
+      });
+      it('adds the product to the products table', function () {
+        expect(data).to.be.an('object');
+        expect(data).to.include(validTestProduct);
+      });
+      it('returns the id of the added product', function () {
+        expect(result).to.be.a('number');
+        expect(result).to.equal(data.item_id);
+      });
+    });
+    describe('when the product parameter is not valid', function () {
+      it('eventually rejects with an error', function (done) {
+        const invalidTest = {
+          product_name: 'Bad',
+        };
+        const name = invalidTest.product_name;
+        testDb
+          .addProduct(invalidTest)
+          .then(done)
+          .catch(() => done());
+      });
     });
   });
 });

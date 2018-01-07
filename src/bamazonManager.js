@@ -8,6 +8,11 @@ function showAllProducts() {
     .getTable()
     .then(customerView.renderProducts);
 }
+function showLowInventory() {
+  return db
+    .getLowInventory()
+    .then(customerView.renderProducts);
+}
 function quit() {
   db.connection.end();
 }
@@ -15,10 +20,8 @@ function run() {
   managerView
     .mainMenu()
     .then(({ action }) => {
-      if (action === 'all') {
-        return showAllProducts()
-          .then(run);
-      }
+      if (action === 'all') return showAllProducts().then(run);
+      if (action === 'low') return showLowInventory().then(run);
       if (action === 'quit') return quit();
       return run();
     })

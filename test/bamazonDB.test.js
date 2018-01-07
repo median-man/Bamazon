@@ -21,23 +21,23 @@ describe('BamazonDB', function () {
   let testDb;
   const testProducts = [
     {
-      name: 'Nostalgia Electrics BSET100CR 3 in 1 Breakfast Station',
-      dept: 'Home',
+      product_name: 'Nostalgia Electrics BSET100CR 3 in 1 Breakfast Station',
+      department_name: 'Home',
       price: 69.99,
-      quantity: 3,
+      stock_quantity: 3,
     },
     {
-      name: 'The AB Hancer',
-      dept: 'Sports',
+      product_name: 'The AB Hancer',
+      department_name: 'Sports',
       price: 30.00,
-      quantity: 300,
+      stock_quantity: 300,
     },
   ];
   beforeEach(function initializeDB(done) {
     testDb = new BamazonDB(configs.test);
 
-    const productToSql = product => `("${product.name}", "${product.dept}", ${product.price}, ` +
-      `${product.quantity})`;
+    const productToSql = product => `("${product.product_name}", "${product.department_name}", ${product.price}, ` +
+      `${product.stock_quantity})`;
 
     const productsTableName = 'products';
     const createProductTblSql =
@@ -110,14 +110,20 @@ describe('BamazonDB', function () {
         .getProductById(1)
         .then((data) => {
           expect(data).to.be.an('object')
-            .that.includes.all.keys('name', 'dept', 'price', 'quantity', 'id');
+            .that.includes.all.keys(
+              'item_id',
+              'product_name',
+              'department_name',
+              'price',
+              'stock_quantity',
+            );
           done();
         })
         .catch(done);
     });
     function testGetProductById(id, expectedProduct) {
       const product = expectedProduct;
-      product.id = id;
+      product.item_id = id;
       it(`eventually returns the requested data where item_id = ${id}`, function (done) {
         testDb
           .getProductById(id)

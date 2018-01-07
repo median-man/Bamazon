@@ -5,7 +5,7 @@ const devConfig = require('../db/config.json').dev;
 function queryPromise(connection, sql, values) {
   return new Promise((resolve, reject) => {
     connection.query(sql, values, (err, result) => {
-      if (err) reject(err);
+      if (err) throw err;
       resolve(result);
     });
   });
@@ -30,18 +30,13 @@ BamazonDB.prototype.getTable = function getTable() {
 };
 
 BamazonDB.prototype.getProductById = function getProductById(id) {
-  const sql = 'SELECT * FROM products WHERE item_id = ?';
+  const sql = 'SELECT * FROM products WHERE item_id=?';
   return queryPromise(this.connection, sql, [id])
-    .then(([product]) => ({
-      id: product.item_id,
-      name: product.product_name,
-      dept: product.department_name,
-      price: product.price,
-      quantity: product.stock_quantity,
-    }));
+    .then(([product]) => product);
 };
 
 BamazonDB.prototype.updateProductQty = function updateProductQtyById(id, newQty) {
+  console.log(newQty)
   const sql = 'UPDATE products SET stock_quantity=? WHERE item_id=?';
   return queryPromise(this.connection, sql, [newQty, id]);
 };

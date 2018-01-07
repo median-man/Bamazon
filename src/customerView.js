@@ -27,8 +27,24 @@ function renderProducts(data) {
 
 // displays transaction info
 function renderTransaction(product, quantity) {
-  printToConsole(`\nSuccessfully purchased ${quantity} of ${product.name} for ` +
+  printToConsole(`\nSuccessfully purchased ${quantity} of ${product.product_name} for ` +
     `$${(product.price * quantity).toFixed(2)}.`);
+}
+
+function validateChoice(choice, products) {
+  // return true if user chooses to quit
+  if (choice === 'Q' || choice === 'q') return true;
+
+  // return false if choice is not a number
+  if (typeof choice !== 'number') return false;
+
+  // return message if product id not found or insufficient stock
+  const productChoice = products.find(product => product.item_id === choice);
+  if (!productChoice) return 'Invalid item id.';
+  if (productChoice.stock_quantity < 1) return 'Insufficient quantity available.';
+
+  // valid id and quantity
+  return true;
 }
 
 function getPurchaseInput(products) {
@@ -38,26 +54,28 @@ function getPurchaseInput(products) {
       type: 'input',
       message: 'Enter the ID for the item you would like to ' +
         "purchase or 'Q' to quit:",
-
-      // ensure there is a product with entered id
-      validate(input) {
-        const inputInt = parseInt(input, 10);
-        if (products.find(product => product.item_id === inputInt)) return true;
-        if (input === 'Q') return true;
-        return `${input} is not a valid choice.`;
+      filter(choice) {
+        const numChoice = parseInt(choice, 10);
+        if (!Number.isNaN(numChoice)) return numChoice;
+        if (choice.toUpperCase() === 'Q') return 'Q';
+        return choice;
       },
+      // ensure there is a product with entered id
+      validate: filteredInput => validateChoice(filteredInput, products),
     },
     {
       name: 'quantity',
       type: 'input',
       message: 'How many?',
 
+      filter(qty) { return parseFloat(qty); },
+
       // display question if user did not select quit
       when(answers) { return answers.choice !== 'Q'; },
 
       // quantity must be a number greater than or = 0
       validate(input) {
-        return parseFloat(input) >= 0 || 'Amount must be a number greater than 0.';
+        return input >= 0 || 'Amount must be a number greater than 0.';
       },
     },
   ]);
@@ -68,4 +86,5 @@ module.exports = {
   printToConsole,
   renderProducts,
   renderTransaction,
+  validateChoice,
 };

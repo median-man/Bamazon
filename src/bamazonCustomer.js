@@ -1,8 +1,6 @@
 /*
 *   Import Modules
  */
-const Inquirer = require('inquirer');
-const Table = require('cli-table');
 const BamazonDB = require('./BamazonDB.js');
 const customerView = require('./customerView.js');
 
@@ -14,26 +12,26 @@ const { connection } = db;
 
 // Records transaction if sufficient quantity of the selected
 // item is available
-function handlePurchase(input) {
+function handlePurchase(input, cb) {
   // get the product
   db
     .getProductById(parseInt(input.id, 10))
     .then((product) => {
       // check availability
-      if (input.quantity > product.quantity) {
+      if (input.quantity > product.stock_quantity) {
         // there isn't enough available. notify user and return
         printToConsole('\nInsufficient quantity Choose something else.');
-        run();
+        cb();
 
       // update database and display transaction summary to the user
       } else {
         // update the quantity of the item in the database
-        const newQty = product.quantity - input.quantity;
+        const newQty = product.stock_quantity - input.quantity;
         db
           .updateProductQty(input.id, newQty)
           .then(() => {
             customerView.renderTransaction(product, input.quantity);
-            run();
+            cb();
           })
           .catch((err) => { throw err; });
       }
@@ -100,7 +98,7 @@ function run() {
       return handlePurchase({
         id: answers.choice,
         quantity: answers.quantity,
-      });
+      }, run);
     }).catch(handleError);
 }
 exports.run = run;

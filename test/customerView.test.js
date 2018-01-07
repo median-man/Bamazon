@@ -29,6 +29,7 @@ describe('customerView', function () {
     'printToConsole',
     'renderProducts',
     'renderTransaction',
+    'validateChoice',
   ].forEach(itHasMethod);
 
   describe('createProductTable', function () {
@@ -49,5 +50,35 @@ describe('customerView', function () {
     }
     productData.forEach(testResult);
   });
+  describe('validateChoice', function () {
+    const { validateChoice } = customerView;
+    describe('when the products parameter has items with id\'s including 2 and 11', function () {
+      it('returns true when choice is Q ignoring the case', function () {
+        expect(validateChoice('Q')).to.be.true; // eslint-disable-line
+        expect(validateChoice('q')).to.be.true; // eslint-disable-line
+      });
 
+      function itReturnsTrue(choice) {
+        it(`returns true when choice is ${choice} and item ${choice} has quantity > 0`, function () {
+          expect(validateChoice(choice, productData)).to.be.true; // eslint-disable-line
+        });
+      }
+      itReturnsTrue(2);
+      itReturnsTrue(11);
+
+      it('returns a message when choice is 2 and item 2 has quantity = 0', function () {
+        const item2 = productData.find(product => product.item_id === 2);
+        const quantity = item2.stock_quantity;
+        item2.stock_quantity = 0;
+        expect(validateChoice(2, productData)).to.be.a('string');
+        item2.stock_quantity = quantity;
+      });
+      it('returns a message when choice is 1', function () {
+        expect(validateChoice(1, productData)).to.be.a('string');
+      });
+      it('returns false when choice is a string other than q or Q', function () {
+        expect(validateChoice('foo')).to.be.false; // eslint-disable-line
+      });
+    });
+  });
 });

@@ -4,41 +4,11 @@
 const Inquirer = require('inquirer');
 const Table = require('cli-table');
 const BamazonDB = require('./BamazonDB.js');
-
-// product table instance
-let productTable;
+const customerView = require('./customerView.js');
 
 // create a connection to the Bamazon database
 const db = new BamazonDB();
 const { connection } = db;
-
-// Class with properties and methods for interacting with and rendering
-// product data
-function ProductTable(products) {
-  // configure table headers and styling
-  const table = new Table({
-    head: ['Id', 'Item', 'Dept', 'Price', 'Qty'],
-    colWidths: [4, 50, 10, 7, 5],
-  });
-
-  // array of products
-  this.products = products;
-
-  // Returns a string representation of the table including
-  // borders and other formatting properties
-  this.toString = function productTableToString() {
-    this.products.forEach((element) => {
-      table.push([
-        element.item_id.toString(),
-        element.product_name,
-        element.department_name,
-        element.price.toFixed(2),
-        element.stock_quantity.toString(),
-      ]);
-    });
-    return table.toString();
-  };
-}
 
 // Prompt user for item to purchase and quantity or to
 // quit application
@@ -148,8 +118,8 @@ function run() {
   return db.getTable()
     .then((data) => {
       // create a new instance of ProductTable and display it
-      productTable = new ProductTable(data);
-      console.log(`\n\n${productTable.toString()}`);
+      // productTable = new ProductTable(data);
+      console.log(`\n\n${customerView.createProductTable(data)}`);
 
       // get user input
       return getPurchaseInput(data);

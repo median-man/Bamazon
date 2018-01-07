@@ -12,30 +12,24 @@ const { connection } = db;
 
 // Records transaction if sufficient quantity of the selected
 // item is available
-function handlePurchase(input, cb) {
+function handlePurchase(input) {
   // get the product
-  db
+  return db
     .getProductById(parseInt(input.id, 10))
     .then((product) => {
-      // check availability
-      if (input.quantity > product.stock_quantity) {
-        // there isn't enough available. notify user and return
-        printToConsole('\nInsufficient quantity Choose something else.');
-        cb();
-
-      // update database and display transaction summary to the user
-      } else {
-        // update the quantity of the item in the database
+      // update database and display the transaction
+      if (input.quantity > 0) {
         const newQty = product.stock_quantity - input.quantity;
-        db
+        return db
           .updateProductQty(input.id, newQty)
           .then(() => {
             customerView.renderTransaction(product, input.quantity);
-            cb();
-          })
-          .catch((err) => { throw err; });
+          });
       }
-    });
+      return null;
+    })
+    // .then(cb)
+    .catch((err) => { throw err; });
 }
 
 // Handling for all errors are directed to this function. Displays
@@ -83,22 +77,23 @@ function run() {
       return customerView.getPurchaseInput(data);
     })
     .then((answers) => {
-      // if user wants to quit, close db connection
+      // if user wants to quit, close db connection and exit
       if (answers.choice === 'Q') {
-        return db.connection.end((err) => {
+        db.connection.end((err) => {
           if (err) return handleError(err);
-          return printToConsole('Good bye.');
+          printToConsole('Good bye.');
+          return process.exit();
         });
+        return false;
       }
-
-      // do nothing if quantity is 0
-      if (!answers.quantity) return run();
 
       // return user input
       return handlePurchase({
         id: answers.choice,
         quantity: answers.quantity,
-      }, run);
-    }).catch(handleError);
+      });
+    })
+    .then(proceed => (proceed ? run() : null))
+    .catch(handleError);
 }
 exports.run = run;

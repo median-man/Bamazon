@@ -8,7 +8,7 @@ describe('customerView', function () {
       product_name: 'Cupcake',
       department_name: 'Health',
       price: 3.99,
-      stock_quantity: 628,
+      stock_quantity: 10,
     },
     {
       item_id: 2,
@@ -30,6 +30,7 @@ describe('customerView', function () {
     'renderProducts',
     'renderTransaction',
     'validateChoice',
+    'validateQuantity',
   ].forEach(itHasMethod);
 
   describe('createProductTable', function () {
@@ -79,6 +80,27 @@ describe('customerView', function () {
       it('returns false when choice is a string other than q or Q', function () {
         expect(validateChoice('foo')).to.be.false; // eslint-disable-line
       });
+    });
+  });
+  describe('validateQuantity', function () {
+    const { validateQuantity } = customerView;
+    beforeEach(function () {
+      productData.find(product => product.item_id === 2).stock_quantity = 10;
+    });
+    it('accepts a quantity, id, and products arguments', function () {
+      validateQuantity(1, 2, productData);
+    });
+    it('returns true when amount is less than the stock quantity for the item', function () {
+      expect(validateQuantity(1, 2, productData)).to.be.true;
+    });
+    it('returns a string when amount is greater than the stock quantity for the item', function () {
+      expect(validateQuantity(11, 2, productData)).to.be.a('string');
+    });
+    it('returns true when amount is equal to the stock quantity for the item', function () {
+      expect(validateQuantity(10, 2, productData)).to.be.true;
+    });
+    it('returns false when amount is less than 0', function () {
+      expect(validateQuantity(-1, 2, productData)).to.be.false;
     });
   });
 });

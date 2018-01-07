@@ -20,6 +20,9 @@ function createProductTable(data) {
   });
   return table.toString();
 }
+function findProduct(id, products) {
+  return products.find(product => product.item_id === id);
+}
 
 function renderProducts(data) {
   printToConsole(createProductTable(data).toString());
@@ -39,12 +42,18 @@ function validateChoice(choice, products) {
   if (typeof choice !== 'number') return false;
 
   // return message if product id not found or insufficient stock
-  const productChoice = products.find(product => product.item_id === choice);
+  const productChoice = findProduct(choice, products);
   if (!productChoice) return 'Invalid item id.';
   if (productChoice.stock_quantity < 1) return 'Insufficient quantity available.';
 
   // valid id and quantity
   return true;
+}
+
+function validateQuantity(qty, id, products) {
+  const stockQuantity = findProduct(id, products).stock_quantity;
+  if (stockQuantity < qty) return 'Insufficient quantity available.';
+  return qty > -1;
 }
 
 function getPurchaseInput(products) {
@@ -73,10 +82,9 @@ function getPurchaseInput(products) {
       // display question if user did not select quit
       when(answers) { return answers.choice !== 'Q'; },
 
-      // quantity must be a number greater than or = 0
-      validate(input) {
-        return input >= 0 || 'Amount must be a number greater than 0.';
-      },
+      // quantity must be a number greater than 0 and there must be sufficient
+      // stock available
+      validate: (input, answers) => validateQuantity(input, answers.choice, products),
     },
   ]);
 }
@@ -87,4 +95,5 @@ module.exports = {
   renderProducts,
   renderTransaction,
   validateChoice,
+  validateQuantity,
 };

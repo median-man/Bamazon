@@ -87,50 +87,6 @@ function validateQuantity(quantity) {
   return true;
 }
 
-// Add inventory returns user input for updating the stock quantity of an item
-// it returns a promise which resolves to an object with an object with id and newQuantity
-// or else it resolves to false
-function addInventory(products) {
-  const questions = [
-    {
-      type: 'list',
-      name: 'id',
-      message: 'Choose a product to edit inventory',
-      choices: getProductList(products).concat(['cancel']),
-    },
-    {
-      type: 'input',
-      name: 'newQuantity',
-      message: 'Enter new quantity or C to cancel',
-      when({ id }) { return id !== 'cancel'; },
-      filter(quantity) {
-        if (quantity.toLowerCase() === 'c') return 'cancel';
-        return parseFloat(quantity, 10);
-      },
-      validate(quantity) {
-        if (quantity === 'cancel') return true;
-        if (Number.isNaN(quantity)) return 'Invalid choice';
-        if (quantity < 0) return 'Quantity must be >= 0';
-        return true;
-      },
-    },
-    {
-      type: 'confirm',
-      name: 'confirm',
-      when: ({ id, newQuantity }) => (id !== 'cancel' && newQuantity !== 'cancel'),
-      message: ({ id, newQuantity }) =>
-        `Set inventory of ${findProduct(id, products).product_name} to ${newQuantity}`,
-    },
-  ];
-  return inquirer
-    .prompt(questions)
-    .then(({ id, newQuantity, confirm }) => {
-      if (newQuantity === 'cancel' || id === 'cancel') return false;
-      if (!confirm) return addInventory(products);
-      return { id, newQuantity };
-    });
-}
-
 function getItemName() {
   return inquirer.prompt({
     type: 'input',
@@ -199,6 +155,50 @@ function getConfirm(message) {
     name: 'confirm',
     message,
   });
+}
+
+function getProductId(products) {
+  return inquirer
+    .prompt({
+      type: 'list',
+      name: 'id',
+      message: 'Choose a product to edit inventory',
+      choices: getProductList(products).concat(['cancel']),
+      filter(input) {
+        if (input === 'cancel') return 'C';
+        return input;
+      },
+    })
+    .then(answers => answers.id);
+}
+
+// Add inventory returns user input for updating the stock quantity of an item
+// it returns a promise which resolves to an object with an id and newQuantity
+// or else it resolves to false if the user cancels
+function addInventory(products, input, cancel) {
+  if (cancel) return false;
+  if (!input) {
+    return getProductId(products)
+      .then((id) => {
+        if (id === 'C') return addInventory(null, null, true);
+        return addInventory(products, { id });
+      });
+  }
+  if (!input.newQuantity) {
+    return getQuantity()
+      .then(({ stock_quantity: newQuantity }) => {
+        if (newQuantity === 'C') return addInventory(null, null, true);
+        Object.assign(input, { newQuantity });
+        return addInventory(products, input);
+      });
+  }
+  const { id, newQuantity } = input;
+  const message = `Set inventory of ${findProduct(id, products).product_name} to ${newQuantity}`;
+  return getConfirm(message)
+    .then(({ confirm }) => {
+      if (confirm) return input;
+      return false;
+    });
 }
 
 function addProduct(product = {}, cancel) {

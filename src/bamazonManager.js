@@ -38,7 +38,15 @@ function addProduct() {
     .addProduct()
     .then((product) => {
       if (product) return db.addProduct(product);
-      return null;
+      return false;
+    })
+    .then((id) => {
+      if (id) return db.getProductById(id);
+      return false;
+    })
+    .then((product) => {
+      if (product) return managerView.renderInventoryUpdate(product);
+      return false;
     });
 }
 

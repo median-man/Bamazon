@@ -34,7 +34,12 @@ function addInventory() {
 }
 
 function addProduct() {
-  // return managerView
+  return managerView
+    .addProduct()
+    .then((product) => {
+      if (product) return db.addProduct(product);
+      return null;
+    });
 }
 
 function quit() {

@@ -1,6 +1,11 @@
 const inquirer = require('inquirer');
 const { findProduct, printToConsole, renderProducts } = require('./customerView.js');
 
+function precisionRound(number, precision) {
+  const factor = 10 ** precision;
+  return Math.round(number * factor) / factor;
+}
+
 function padStart(value, len) {
   let result = value;
   if (typeof result !== 'string') result = result.toString();
@@ -42,6 +47,7 @@ function mainMenu() {
 }
 
 function createListItem(product) {
+  let result = '';
   let {
     item_id: id,
     product_name: prodName,
@@ -50,13 +56,15 @@ function createListItem(product) {
     price,
   } = product;
   // format strings for each value to display
-  id = padStart(id, 3);
+  id = id ? padStart(id, 3) : false;
   prodName = toFixedLength(prodName, 14);
   dept = toFixedLength(dept, 5);
   stock = padStart(stock, 4);
   price = padStart(price, 7);
   // string to display in the list
-  return `${id} | ${prodName} | ${dept} | ${stock} | ${price}`;
+  result = `${prodName} | ${dept} | ${stock} | ${price}`;
+  return id ? `${id} | ${result}` : result;
+  // return `${id} | ${prodName} | ${dept} | ${stock} | ${price}`;
 }
 
 function getProductList(products) {
@@ -123,75 +131,110 @@ function addInventory(products) {
     });
 }
 
-function addProduct() {
-  const questions = [
-    {
-      type: 'input',
-      name: 'product_name',
-      message: 'Enter the product name or C to cancel',
-      validate: input => validateName(input, 35),
-      filter(input) {
-        if (input.toUpperCase() === 'C') return 'C';
-        return input;
-      },
+function getItemName() {
+  return inquirer.prompt({
+    type: 'input',
+    name: 'product_name',
+    message: 'Enter the product name or C to cancel',
+    validate: input => validateName(input, 35),
+    filter(input) {
+      if (input.toUpperCase() === 'C') return 'C';
+      return input;
     },
-    {
-      type: 'input',
-      name: 'department_name',
-      message: 'Enter the department name or C to cancel',
-      when: answers => answers.product_name !== 'C',
-      filter(input) {
-        if (input.toUpperCase() === 'C') return 'C';
-        return input;
-      },
-      validate: input => validateName(input, 15),
+  });
+}
+
+function getDepartmentName() {
+  return inquirer.prompt({
+    type: 'input',
+    name: 'department_name',
+    message: 'Enter the department name or C to cancel',
+    filter(input) {
+      if (input.toUpperCase() === 'C') return 'C';
+      return input;
     },
-    {
-      type: 'input',
-      name: 'price',
-      message: 'Enter the price or C to cancel',
-      when: answers => answers.department_name !== 'C' && answers.product_name !== 'C',
-      filter: input => (input.toUpperCase() === 'C' ? 'C' : parseFloat(input, 10).toFixed(2)),
-      validate(input) {
-        if (Number.isNaN(input)) return 'Enter a number';
-        return true;
-      },
+    validate: input => validateName(input, 15),
+  });
+}
+
+function getPrice() {
+  return inquirer.prompt({
+    type: 'input',
+    name: 'price',
+    message: 'Enter the price or C to cancel',
+    filter(input) {
+      if (input.toUpperCase() === 'C') return 'C';
+      const price = parseFloat(input, 10);
+      return precisionRound(price, 2);
     },
-    {
-      type: 'input',
-      name: 'stock_quantity',
-      message: 'Enter the quantity or C to cancel',
-      when: answers => answers.department_name !== 'C' &&
-        answers.product_name !== 'C' &&
-        answers.price !== 'C',
-      filter: input => (input.toUpperCase() === 'C' ? 'C' : parseFloat(input, 10)),
-      validate(input) {
-        if (Number.isNaN(input)) return 'Enter a number';
-        return true;
-      },
+    validate(input) {
+      if (Number.isNaN(input)) return 'Enter a number';
+      if (input < 0) return 'Cannot be negative.';
+      return true;
     },
-    {
-      type: 'confirm',
-      name: 'confirm',
-      message: answers => `Add item to stock: ${Object.values(answers).join(' | ')} ?`,
-      when: answers => answers.department_name !== 'C' &&
-        answers.product_name !== 'C' &&
-        answers.price !== 'C' &&
-        answers.stock_quantity !== 'C',
-      filter: input => (input.toUpperCase() === 'C' ? 'C' : parseFloat(input, 10)),
-      validate(input) {
-        if (Number.isNaN(input)) return 'Enter a number';
-        return true;
-      },
+  });
+}
+
+function getQuantity() {
+  return inquirer.prompt({
+    type: 'input',
+    name: 'stock_quantity',
+    message: 'Enter new quantity or C to cancel',
+    filter(quantity) {
+      if (quantity.toLowerCase() === 'c') return 'C';
+      return parseFloat(quantity, 10);
     },
-  ];
-  return inquirer
-    .prompt(questions)
+    validate(quantity) {
+      if (quantity === 'C') return true;
+      if (Number.isNaN(quantity)) return 'Invalid choice';
+      if (quantity < 0) return 'Quantity must be >= 0';
+      return true;
+    },
+  });
+}
+
+function getConfirm(message) {
+  return inquirer.prompt({
+    type: 'confirm',
+    name: 'confirm',
+    message,
+  });
+}
+
+function addProduct(product = {}, cancel) {
+  // handleResponse calls addProduct with cancel = true if user cancels. Else, calls
+  // addProduct after adding input to product object
+  const handleResponse = (answers) => {
+    if (Object.values(answers).includes('C')) return addProduct(null, true);
+    Object.assign(product, answers);
+    return addProduct(product);
+  };
+
+  // resolves to false if user cancels
+  if (cancel) return Promise.resolve(false);
+
+  // get user input for each property
+  if (typeof product.product_name === 'undefined') {
+    return getItemName().then(handleResponse);
+  }
+  if (typeof product.department_name === 'undefined') {
+    return getDepartmentName().then(handleResponse);
+  }
+  if (typeof product.price === 'undefined') {
+    return getPrice().then(handleResponse);
+  }
+  if (typeof product.stock_quantity === 'undefined') {
+    return getQuantity().then(handleResponse);
+  }
+
+  // get confirmation from user and resolve promise if user confirms
+  const confirmationText = 'Add the following product?:\n' +
+    `  ${Object.values(product).join(' | ')}\n`;
+
+  return getConfirm(confirmationText)
     .then((answers) => {
-      // return false if user canceled
-      if (!answers.confirm) return false;
-      if (Object.values(answers).includes('C')) return false;
-      return answers;
+      if (answers.confirm) return Promise.resolve(product);
+      return addProduct(null, true);
     });
 }
 

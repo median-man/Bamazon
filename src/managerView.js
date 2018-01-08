@@ -66,6 +66,14 @@ function getProductList(products) {
   }));
 }
 
+function validateName(input, maxLength) {
+  if (input.toUpperCase() === 'C') return true;
+  if (!/[a-z]/i.test(input)) return 'Input must contain a letter.';
+  if (input.length < 2) return 'Must have at least 2 characters';
+  if (input.length > maxLength) return `Must contain ${maxLength} or fewer characters.`;
+  return true;
+}
+
 function validateQuantity(quantity) {
   if (quantity < 0 || Number.isNaN(quantity)) return 'Invalid amount';
   return true;
@@ -115,10 +123,88 @@ function addInventory(products) {
     });
 }
 
+function addProduct() {
+  const questions = [
+    {
+      type: 'input',
+      name: 'product_name',
+      message: 'Enter the product name or C to cancel',
+      validate: input => validateName(input, 35),
+      filter(input) {
+        if (input.toUpperCase() === 'C') return 'C';
+        return input;
+      },
+    },
+    {
+      type: 'input',
+      name: 'department_name',
+      message: 'Enter the department name or C to cancel',
+      when: answers => answers.product_name !== 'C',
+      filter(input) {
+        if (input.toUpperCase() === 'C') return 'C';
+        return input;
+      },
+      validate: input => validateName(input, 15),
+    },
+    {
+      type: 'input',
+      name: 'price',
+      message: 'Enter the price or C to cancel',
+      when: answers => answers.department_name !== 'C' && answers.product_name !== 'C',
+      filter: input => (input.toUpperCase() === 'C' ? 'C' : parseFloat(input, 10).toFixed(2)),
+      validate(input) {
+        if (Number.isNaN(input)) return 'Enter a number';
+        return true;
+      },
+    },
+    {
+      type: 'input',
+      name: 'stock_quantity',
+      message: 'Enter the quantity or C to cancel',
+      when: answers => answers.department_name !== 'C' &&
+        answers.product_name !== 'C' &&
+        answers.price !== 'C',
+      filter: input => (input.toUpperCase() === 'C' ? 'C' : parseFloat(input, 10)),
+      validate(input) {
+        if (Number.isNaN(input)) return 'Enter a number';
+        return true;
+      },
+    },
+    {
+      type: 'confirm',
+      name: 'confirm',
+      message: answers => `Add item to stock: ${Object.values(answers).join(' | ')} ?`,
+      when: answers => answers.department_name !== 'C' &&
+        answers.product_name !== 'C' &&
+        answers.price !== 'C' &&
+        answers.stock_quantity !== 'C',
+      filter: input => (input.toUpperCase() === 'C' ? 'C' : parseFloat(input, 10)),
+      validate(input) {
+        if (Number.isNaN(input)) return 'Enter a number';
+        return true;
+      },
+    },
+  ];
+  return inquirer
+    .prompt(questions)
+    .then((answers) => {
+      // return false if user canceled
+      if (!answers.confirm) return false;
+      if (Object.values(answers).includes('C')) return false;
+      return answers;
+    });
+}
+
 function renderInventoryUpdate(product) {
   renderProducts([product]);
   printToConsole('Item succesfully updated!');
 }
 module.exports = {
-  addInventory, getProductList, mainMenu, renderInventoryUpdate, validateQuantity,
+  addInventory,
+  addProduct,
+  getProductList,
+  mainMenu,
+  renderInventoryUpdate,
+  validateName,
+  validateQuantity,
 };

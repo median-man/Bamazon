@@ -24,10 +24,21 @@ Manager interface provides the ability to do the following:
 ## Installation
 1. Clone the repository from [GitHub](https://github.com/median-man/Bamazon)
 2. From the command line terminal, change to the repository directory.
-3. Run "npm install"
-4. Setup a MySql database and server using the bamazonSchema.sql file.
-5. Start the MySql server on port 3306. (You may edit bamazonCustomer.js if your MySql server is configured to run on another port by editing the connection configuration located near the top of the file.)
-5. Enter your username and password for the MySql server in the keys.json file.
+3. Run `npm install`
+4. Setup a MySql database and server using the createBamazonDB.sql file.
+5. Optional seed the database with seeds.sql file.
+6. Ensure MySql server is running.
+7. Edit the username, password, and other database configuration fields as necessary to allow
+Bamazon to connect to a MySql database.
+```json
+"dev": {
+    "user": "USERNAME",
+    "password": "PASSWORD",
+    "host": "localhost",
+    "port": 3306,
+    "database": "bamazon_DB"
+  }
+```
 
 ## Demonstration Video
 Click on the image to see a demo video of the customer interface.

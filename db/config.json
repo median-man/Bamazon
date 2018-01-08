@@ -1,0 +1,16 @@
+{
+  "dev": {
+    "user": "username",
+    "password": "password",
+    "host": "localhost",
+    "port": 3306,
+    "database": "bamazon_DB"
+  },
+  "test": {
+    "user": "username",
+    "password": "password",
+    "host": "localhost",
+    "port": 3306,
+    "database": "bamazon_test_DB"
+  }
+}

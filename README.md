@@ -44,5 +44,16 @@ Bamazon to connect to a MySql database.
 Click on the image to see a demo video of the customer interface.
 [![Screenshot of Bamazon Demo](http://img.youtube.com/vi/oivuUEn2sls/0.jpg)](http://www.youtube.com/watch?v=oivuUEn2sls)
 
+## To Do
+* handle mysql connection errors gracefully (feat/mysql-con-errors)
+* create departments table and seeds (feat/departments/list)
+* managers choose dept from list when adding products (feat/departments/list)
+* create supervisor mode feature (feat/supervisor)
+* add product_sales column to products table (feat/supervisor/prod-sales)
+
+### Supervisor Mode (feature request)
+* view sales by department (feat/supervisor/dept-sales)
+* create department (feat/supervisor/dept-create)
+
 ---
 Created by John Desrosiers. 2017

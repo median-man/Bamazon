@@ -31,7 +31,7 @@ From [Examples of Foreign Key Clauses](https://dev.mysql.com/doc/refman/5.7/en/c
 * Seeds should remove all data from tables before seeding new data.
 * Seed the departments table
 
-## Add getDeptList method to BamazonDB object
+## Add getDepartments method to BamazonDB object
 Returns an array of row objects containing all data from the departments table.
 
 ## Modify Manager/Add Product feature

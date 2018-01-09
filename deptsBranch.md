@@ -30,7 +30,6 @@ From [Examples of Foreign Key Clauses](https://dev.mysql.com/doc/refman/5.7/en/c
 ## Modify seeds.sql
 * Seeds should remove all data from tables before seeding new data.
 * Seed the departments table
-* The products table seeds must not contain product names which are not contained.
 
 ## Add getDeptList method to BamazonDB object
 Returns an array of row objects containing all data from the departments table.

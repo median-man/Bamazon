@@ -1,5 +1,5 @@
 -- Remove all data from Bamazon DB then add seed data.
-
+USE bamazon_DB;
 -- turn off safe update to delete without a where clause
 SET SQL_SAFE_UPDATES=0;
 TRUNCATE TABLE products;

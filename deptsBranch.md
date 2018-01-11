@@ -1,5 +1,9 @@
 # Depts Branch
 
+## TO DO
+* Fix broken tests
+* finish implementing initTestDb
+
 ## Modify createBamazonDB.sql
 Create a departments table with the following columns:
 * department_id

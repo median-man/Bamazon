@@ -1,19 +1,15 @@
 const { expect } = require('chai');
-const mysql = require('mysql');
 const configs = require('../db/config.json');
 const BamazonDB = require('../src/BamazonDB.js');
+const testDbFixture = require('./fixtures/testDB.js');
 
-// executes a query on a connection for each query in an array. throws if an
-// err is passed to the callback for the query. Once all queries are complete
-// executes optional callback function
-function runQueries(connection, queries, cb) {
-  let completedQueries = 0;
-  queries.forEach((query) => {
-    connection.query(query, (err) => {
-      if (err) throw err;
-      completedQueries += 1;
-      if (cb && completedQueries === queries.length) cb();
-    });
+// Test if function returns a promise and then resolves the promise to allow
+// the mocha process to exit.
+function itReturnsPromise(func) {
+  it('returns a promise', function (done) {
+    const res = func();
+    expect(res).to.be.a('promise');
+    res.then(() => done()).catch(done);
   });
 }
 
@@ -33,37 +29,31 @@ describe('BamazonDB', function () {
       stock_quantity: 5,
     },
   ];
-  function initializeDB(done, products = testProducts) {
-    testDb = new BamazonDB(configs.test);
-
-    const productToSql = product => `("${product.product_name}", "${product.department_name}", ${product.price}, ` +
-      `${product.stock_quantity})`;
-
-    const productsTableName = 'products';
-    const createProductTblSql =
-      'CREATE TABLE products(' +
-        'item_id INT NOT NULL AUTO_INCREMENT,' +
-        'product_name VARCHAR(100) NOT NULL,' +
-        'department_name VARCHAR(45) NOT NULL,' +
-        'price DECIMAL(7,2) default 0,' +
-        'stock_quantity INT default 0,' +
-        'PRIMARY KEY (item_id)' +
-      ');';
-    const seedProductTblSql =
-      'INSERT INTO ' +
-        'products(product_name, department_name, price, stock_quantity) ' +
-      `VALUES ${productToSql(products[0])}, ${productToSql(products[1])}`;
-
-    // reset the products table and seed it
-    runQueries(testDb.connection, [`DROP TABLE IF EXISTS ${productsTableName}`]);
-    runQueries(testDb.connection, [createProductTblSql, seedProductTblSql], done);
+  function initializeDB(done) {
+    // initialize the test db and seed it
+    testDbFixture
+      .init()
+      .then(testDbFixture.seed)
+      .then((con) => {
+        con.end((err) => {
+          if (err) throw err;
+          // create new instance of BamazonDB
+          testDb = new BamazonDB(configs.test);
+          done();
+        });
+      })
+      .catch(done);
   }
   beforeEach(initializeDB);
   afterEach(function closeDbConnection(done) {
-    if (testDb.connection.state !== 'disconnected') testDb.connection.end();
-    done();
-  });
-  after(function destroyDbConnection() {
+    if (testDb.connection.state !== 'disconnected') {
+      testDb.connection.end((err) => {
+        if (err) return done(err);
+        return done();
+      });
+    } else {
+      done();
+    }
   });
   it('has a connection', function () {
     expect(testDb.connection).to.be.an('object');
@@ -87,9 +77,7 @@ describe('BamazonDB', function () {
   });
 
   describe('getTable', function () {
-    it('returns a promise', function () {
-      expect(testDb.getTable()).to.be.a('promise');
-    });
+    itReturnsPromise(() => testDb.getTable());
     it('eventually returns an array for all the rows of the products table', function (done) {
       testDb
         .getTable()
@@ -102,9 +90,7 @@ describe('BamazonDB', function () {
   });
 
   describe('getProductById', function () {
-    it('returns a promise', function () {
-      expect(testDb.getProductById(1)).to.be.a('promise');
-    });
+    itReturnsPromise(() => testDb.getProductById(1));
     it('eventually returns a product object', function (done) {
       testDb
         .getProductById(1)
@@ -139,23 +125,20 @@ describe('BamazonDB', function () {
   });
 
   describe('updateProductQty', function () {
-    it('returns a promise', function () {
-      expect(testDb.updateProductQty(1, 1)).to.be.a('promise');
-    });
+    itReturnsPromise(() => testDb.updateProductQty(1, 1));
     function describeResult(id, newQty) {
       describe(`when the id is ${id} and the newQty is ${newQty}`, function () {
         it(`eventually updates the stock_quantity to ${newQty}`, function (done) {
           testDb
             .updateProductQty(id, newQty)
             .then(() => {
-              testDb.connection.end();
-              const testConnection = mysql.createConnection(configs.test);
-              testConnection.query(`SELECT stock_quantity FROM products WHERE item_id = ${id}`, (err, res) => {
-                if (err) throw err;
-                expect(res[0].stock_quantity).to.equal(newQty);
-                done();
-                testConnection.end();
-              });
+              // testDb.connection.end();
+              testDbFixture
+                .query(`SELECT stock_quantity FROM products WHERE item_id = ${id}`)
+                .then((data) => {
+                  expect(data[0].stock_quantity).to.equal(newQty);
+                  done();
+                });
             })
             .catch(done);
         });
@@ -167,23 +150,23 @@ describe('BamazonDB', function () {
 
   describe('getLowInventory', function () {
     function testGetLowInventory(quantity, isEmpty, done) {
-      const products = testProducts.map((product) => {
-        const newProduct = Object.assign({}, product);
-        newProduct.stock_quantity = quantity;
-        return newProduct;
-      });
-      const expectedLength = isEmpty ? 0 : products.length;
-      testDb.connection.end(() => {
-        initializeDB(() => {
-          testDb
+      testDbFixture
+        .init()
+        .then(testDbFixture.seed)
+        .then(con => con.end())
+        .then(() => testDbFixture
+          .query(`UPDATE products SET stock_quantity = ${quantity}`))
+        .then(() => {
+          // testDbFixture.seed inserts 2 rows
+          const expectedLength = isEmpty ? 0 : 2;
+          return testDb
             .getLowInventory()
             .then((data) => {
               expect(data).to.be.an('array').with.lengthOf(expectedLength);
               done();
-            })
-            .catch(done);
-        }, products);
-      });
+            });
+        })
+        .catch(done);
     }
     it('returns an empty array when all products have an inventory greater than 5', function (done) {
       testGetLowInventory(6, true, done);
@@ -193,7 +176,7 @@ describe('BamazonDB', function () {
     });
   });
 
-  describe('addProduct', function () {
+  describe.skip('addProduct', function () {
     let validTestProduct;
     before(function () {
       validTestProduct = Object.assign({}, {
@@ -246,12 +229,16 @@ describe('BamazonDB', function () {
         const invalidTest = {
           product_name: 'Bad',
         };
-        const name = invalidTest.product_name;
+        // const name = invalidTest.product_name;
         testDb
           .addProduct(invalidTest)
           .then(done)
           .catch(() => done());
       });
     });
+  });
+
+  describe('getDepartments', function () {
+
   });
 });

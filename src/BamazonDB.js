@@ -5,8 +5,8 @@ const devConfig = require('../db/config.json').dev;
 function queryPromise(connection, sql, values) {
   return new Promise((resolve, reject) => {
     connection.query(sql, values, (err, result) => {
-      if (err) reject(err);
-      resolve(result);
+      if (err) return reject(err);
+      return resolve(result);
     });
   });
 }
@@ -39,7 +39,8 @@ BamazonDB.prototype.getLowInventory = function getProductsWithLowInventory() {
 BamazonDB.prototype.addProduct = function addProductToProductsTable(product) {
   const sql = 'INSERT INTO products SET ?';
   return queryPromise(this.connection, sql, product)
-    .then(result => result.insertId);
+    .then(result => result.insertId)
+    .catch(() => {};
 };
 
 module.exports = BamazonDB;

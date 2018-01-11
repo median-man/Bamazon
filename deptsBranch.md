@@ -1,8 +1,8 @@
 # Depts Branch
 
 ## TO DO
-* Fix broken tests
-* finish implementing initTestDb
+* fix addProducts test
+* modify addProduct feature of manager view to use a list
 
 ## Modify createBamazonDB.sql
 Create a departments table with the following columns:

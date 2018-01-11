@@ -1,4 +1,5 @@
 const { expect } = require('chai');
+const { format } = require('mysql');
 const configs = require('../db/config.json');
 const BamazonDB = require('../src/BamazonDB.js');
 const testDbFixture = require('./fixtures/testDB.js');
@@ -176,12 +177,12 @@ describe('BamazonDB', function () {
     });
   });
 
-  describe.skip('addProduct', function () {
+  describe.only('addProduct', function () {
     let validTestProduct;
     before(function () {
       validTestProduct = Object.assign({}, {
         product_name: 'Magic Acorns',
-        department_name: 'Magic',
+        department_name: 'Accessories',
         price: 23.99,
         stock_quantity: 2,
       });
@@ -189,32 +190,32 @@ describe('BamazonDB', function () {
     it('is a function', function () {
       expect(testDb.addProduct).to.be.a('function');
     });
-    it('returns a promise', function () {
-      expect(testDb.addProduct(validTestProduct)).to.be.a('promise');
-    });
+    itReturnsPromise(() => testDb.addProduct(validTestProduct));
     describe('when the product parameter is valid', function () {
+      // data returned from running query
       let data;
+      // result of calling addProduct
       let result;
+
+      // Get the result of calling addProduct and query the database for
+      // the added product.
       beforeEach(function (done) {
-        function handleQueryResponse(err, response) {
-          if (err) done(err);
-          [data] = response;
-          done();
-        }
+        let sql = 'SELECT * FROM products WHERE product_name = ';
+        sql += `'${validTestProduct.product_name}'`;
         testDb
           .addProduct(validTestProduct)
           .then((res) => {
             result = res;
-            testDb
-              .connection
-              .query(
-                'SELECT * FROM products WHERE product_name = ?',
-                [validTestProduct.product_name],
-                handleQueryResponse,
-              );
+            return res;
+          })
+          .then(() => testDbFixture.query(sql))
+          .then(([qryRes]) => {
+            data = qryRes;
+            done();
           })
           .catch(done);
       });
+
       it('adds the product to the products table', function () {
         expect(data).to.be.an('object');
         expect(data).to.include(validTestProduct);
@@ -224,6 +225,7 @@ describe('BamazonDB', function () {
         expect(result).to.equal(data.item_id);
       });
     });
+
     describe('when the product parameter is not valid', function () {
       it('eventually rejects with an error', function (done) {
         const invalidTest = {
@@ -234,6 +236,21 @@ describe('BamazonDB', function () {
           .addProduct(invalidTest)
           .then(done)
           .catch(() => done());
+      });
+    });
+
+    describe('when the department name is not in the departments table', () => {
+      it('eventually rejects the promise with an error message which includes "invalid department name"', (done) => {
+        const badDept = Object.assign({}, validTestProduct);
+        badDept.department_name = 'Magic';
+        testDb
+          .addProduct(badDept)
+          .then(() => done('Expected addProduct to reject promise'))
+          .catch((err) => {
+            expect(err.message).to.include('invalid department name');
+            done();
+          })
+          .catch(done);
       });
     });
   });

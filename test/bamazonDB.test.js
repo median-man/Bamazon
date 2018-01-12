@@ -1,5 +1,5 @@
 const { expect } = require('chai');
-const { format } = require('mysql');
+// const { format } = require('mysql');
 const configs = require('../db/config.json');
 const BamazonDB = require('../src/BamazonDB.js');
 const testDbFixture = require('./fixtures/testDB.js');
@@ -255,7 +255,26 @@ describe('BamazonDB', function () {
     });
   });
 
-  describe('getDepartments', function () {
-
+  describe.only('getDepartments', function () {
+    it('is a function', function () {
+      expect(testDb.getDepartments).to.be.a('function');
+    });
+    itReturnsPromise(() => testDb.getDepartments());
+    describe('when there are two rows in the departments table', function () {
+      let result;
+      beforeEach(function (done) {
+        testDb
+          .getDepartments()
+          .then((departments) => {
+            result = departments;
+            done();
+          })
+          .catch(done);
+      });
+      it('returns an array with two department objects', function () {
+        expect(result).to.be.an('array').with.a.lengthOf(2);
+        result.forEach(element => expect(element).to.be.an('object'));
+      });
+    });
   });
 });

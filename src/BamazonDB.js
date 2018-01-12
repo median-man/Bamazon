@@ -47,5 +47,8 @@ BamazonDB.prototype.addProduct = function addProductToProductsTable(product) {
       throw err;
     });
 };
+BamazonDB.prototype.getDepartments = function getAllDepartments() {
+  return queryPromise(this.connection, 'SELECT * FROM departments');
+};
 
 module.exports = BamazonDB;

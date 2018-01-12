@@ -255,7 +255,7 @@ describe('BamazonDB', function () {
     });
   });
 
-  describe.only('getDepartments', function () {
+  describe('getDepartments', function () {
     it('is a function', function () {
       expect(testDb.getDepartments).to.be.a('function');
     });

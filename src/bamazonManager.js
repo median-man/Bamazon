@@ -34,8 +34,9 @@ function addInventory() {
 }
 
 function addProduct() {
-  return managerView
-    .addProduct()
+  return db
+    .getDepartments()
+    .then(depts => managerView.addProduct(depts))
     .then((product) => {
       if (product) return db.addProduct(product);
       return false;

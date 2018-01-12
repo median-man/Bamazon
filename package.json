@@ -4,14 +4,16 @@
   "description": "Amazon-like storefront application.",
   "main": "bamazonCustomer.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha",
+    "start": "node index.js",
+    "manager": "node index.js manager"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/median-man/Bamazon.git"
   },
   "author": "John Desrosiers",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/median-man/Bamazon/issues"
   },
@@ -23,6 +25,9 @@
   },
   "devDependencies": {
     "chai": "^4.1.2",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.8.0",
+    "execsql": "0.0.3",
     "mocha": "^4.1.0"
   }
 }

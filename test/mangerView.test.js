@@ -1,6 +1,7 @@
 const { expect } = require('chai');
 const managerView = require('../src/managerView.js');
-const productDataFixture = require('./productData.json');
+const productDataFixture = require('./fixtures/productData.json');
+const deptDataFixture = require('./fixtures/departmentData.json');
 
 describe('managerView', function () {
   describe('getProductList', function () {
@@ -35,6 +36,36 @@ describe('managerView', function () {
       });
     });
   });
+
+  // deptToString returns an array of strings given an array of department objects
+  describe('deptToString', function () {
+    const { deptToString } = managerView;
+    const testDept = deptDataFixture[0];
+
+    // throws if string does not contain all strings in values array
+    function includesAll(string, values) {
+      values.forEach(val => expect(string).to.include(val));
+    }
+
+    it('is a function', function () {
+      expect(deptToString).to.be.a('function');
+    });
+
+    // Accepts dept object and returns formatted string containing the values
+    it('returns a string which contains the dept id, name, and over head costs when passed a dept object', function () {
+      const resultStr = deptToString(testDept);
+      expect(resultStr).to.be.a('string');
+      includesAll(resultStr, Object.values(testDept));
+    });
+
+    // Accepts an id and name parameter and returns a formatted string containing them
+    it('returns a string which contains id and name parameter when passed id and name arguments', function () {
+      const { department_id: id, name } = testDept;
+      const resultStr = deptToString(id, name);
+      includesAll(resultStr, [id, name]);
+    });
+  });
+
   describe('validateQuantity', function () {
     const { validateQuantity } = managerView;
     function expectWhen(quantity, type) {

@@ -40,7 +40,12 @@ BamazonDB.prototype.addProduct = function addProductToProductsTable(product) {
   const sql = 'INSERT INTO products SET ?';
   return queryPromise(this.connection, sql, product)
     .then(result => result.insertId)
-    .catch(() => {};
+    .catch((err) => {
+      if (err.sqlMessage && err.sqlMessage.includes('foreign key constraint fails')) {
+        throw new Error(`invalid department name: ${product.department_name}`);
+      }
+      throw err;
+    });
 };
 
 module.exports = BamazonDB;

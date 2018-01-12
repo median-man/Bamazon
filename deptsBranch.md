@@ -1,7 +1,6 @@
 # Depts Branch
 
 ## TO DO
-* fix addProducts test
 * modify addProduct feature of manager view to use a list
 
 ## Modify createBamazonDB.sql

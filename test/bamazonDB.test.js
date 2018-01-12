@@ -177,7 +177,7 @@ describe('BamazonDB', function () {
     });
   });
 
-  describe.only('addProduct', function () {
+  describe('addProduct', function () {
     let validTestProduct;
     before(function () {
       validTestProduct = Object.assign({}, {

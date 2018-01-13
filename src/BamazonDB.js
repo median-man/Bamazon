@@ -16,8 +16,9 @@ function BamazonDB(config = devConfig) {
   this.connection = mysql.createConnection(config);
 }
 
-BamazonDB.prototype.getTable = function getTable() {
-  return queryPromise(this.connection, 'SELECT * FROM products');
+BamazonDB.prototype.getTable = function getTable(table) {
+  const sql = 'SELECT * FROM ??';
+  return queryPromise(this.connection, sql, [table || 'products']);
 };
 
 BamazonDB.prototype.getProductById = function getProductById(id) {
@@ -49,7 +50,18 @@ BamazonDB.prototype.addProduct = function addProductToProductsTable(product) {
     });
 };
 BamazonDB.prototype.getDepartments = function getAllDepartments() {
-  return queryPromise(this.connection, 'SELECT * FROM departments');
+  return this.getTable('departments');
+};
+
+BamazonDB.prototype.departmentSales = function getDepartmentSalesTotals() {
+  let sql = 'SELECT departments.department_id, departments.name AS department_name, ';
+  sql += 'departments.over_head_costs, SUM(products.sales) AS product_sales ';
+  sql += 'FROM departments ';
+  sql += 'LEFT JOIN products ON departments.name = products.department_name ';
+  sql += 'GROUP BY departments.name ';
+  sql += 'ORDER BY product_sales DESC';
+
+  return queryPromise(this.connection, sql);
 };
 
 module.exports = BamazonDB;

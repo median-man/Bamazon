@@ -289,4 +289,68 @@ describe('BamazonDB', function () {
       });
     });
   });
+
+  it('responds to departmentSales', function () {
+    expect(testDb).to.respondTo('departmentSales');
+  });
+
+  describe('departmentSales', function () {
+    itReturnsPromise(() => testDb.departmentSales());
+    it('resolves to an array', function (done) {
+      testDb
+        .departmentSales()
+        .then(data => expect(data).to.be.an('array'))
+        .then(() => done())
+        .catch(done);
+    });
+    describe('resolved array', function () {
+      let result;
+
+      beforeEach(function (done) {
+        testDb
+          .departmentSales()
+          .then(function (data) {
+            result = data;
+            done();
+          })
+          .catch(done);
+      });
+
+      it('has two elements when there are two departments', function () {
+        const deptCount = 2;
+        expect(result).to.have.lengthOf(deptCount);
+      });
+
+      it('is in descending order by product_sales', function () {
+        expect(result.map(row => row.product_sales)).to.satisfy((sales) => {
+          for (let i = 1; i < sales.length; i += 1) {
+            expect(sales[i - 1]).to.be.greaterThan(sales[i]);
+          }
+          return true;
+        });
+      });
+
+      describe('each element', function () {
+        it('is an object', function () {
+          result.forEach(element => expect(element).to.be.an('object'));
+        });
+        it('has department_id, department_name, over_head_costs, and product_sales keys', function () {
+          result.forEach(element => expect(element).to.have.all.keys([
+            'department_id',
+            'department_name',
+            'over_head_costs',
+            'product_sales',
+          ]));
+        });
+      });
+
+      describe('when the sum of all products in the sports department is 300', function () {
+        const seededSportsSales = 300;
+        it('product_sales = 300 for the object where department_name = "Sports"', function () {
+          const sportsDept = result.find(el => el.department_name === 'Sports');
+          expect(sportsDept.product_sales).to.equal(seededSportsSales);
+        });
+      });
+    });
+  });
 });

@@ -56,7 +56,6 @@ Click on the image to see a demo video of the customer interface.
 * handle mysql connection errors gracefully (feat/mysql-con-errors)
 
 ### Supervisor Mode (feature request)
-* add departmentSales method to bamazonDb
 * add departmentSales view to supervisor app
 * add getNewDepartmentName to supervisor view
 * add addDepartment method to bamazonDb

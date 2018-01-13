@@ -13,6 +13,7 @@ CREATE TABLE products(
   product_name VARCHAR(100) NOT NULL,
   department_name VARCHAR(15) NOT NULL,
   price DECIMAL(7,2) DEFAULT 0,
-  stock_quantity INT DEFAULT 0,
+  stock_quantity INT DEFAULT 0,  
+  sales DECIMAL(10,2) DEFAULT 0,
   FOREIGN KEY (department_name) REFERENCES departments(name)
 );

@@ -16,18 +16,22 @@ function itReturnsPromise(func) {
 
 describe('BamazonDB', function () {
   let testDb;
+
+  // products that are added by fixtures/seedTestDB.sql
   const testProducts = [
     {
       product_name: 'The Bobcat Mullet',
       department_name: 'Accessories',
       price: 9.99,
       stock_quantity: 6,
+      sales: 0,
     },
     {
       product_name: 'The AB Hancer',
       department_name: 'Sports',
       price: 30.00,
       stock_quantity: 5,
+      sales: 300.00,
     },
   ];
   function initializeDB(done) {

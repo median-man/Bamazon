@@ -63,10 +63,10 @@ describe('BamazonDB', function () {
   it('has a connection', function () {
     expect(testDb.connection).to.be.an('object');
   });
-  it('responds responds to getTable, getProductById, and updateProductQty', function () {
+  it('responds responds to getTable, getProductById, and updateProduct', function () {
     expect(testDb).to.respondTo('getTable');
     expect(testDb).to.respondTo('getProductById');
-    expect(testDb).to.respondTo('updateProductQty');
+    expect(testDb).to.respondTo('updateProduct');
   });
 
   describe('#constructor', function () {
@@ -129,28 +129,36 @@ describe('BamazonDB', function () {
     testGetProductById(2, testProducts[1]);
   });
 
-  describe('updateProductQty', function () {
-    itReturnsPromise(() => testDb.updateProductQty(1, 1));
-    function describeResult(id, newQty) {
-      describe(`when the id is ${id} and the newQty is ${newQty}`, function () {
-        it(`eventually updates the stock_quantity to ${newQty}`, function (done) {
-          testDb
-            .updateProductQty(id, newQty)
-            .then(() => {
-              // testDb.connection.end();
-              testDbFixture
-                .query(`SELECT stock_quantity FROM products WHERE item_id = ${id}`)
-                .then((data) => {
-                  expect(data[0].stock_quantity).to.equal(newQty);
-                  done();
-                });
-            })
-            .catch(done);
-        });
-      });
+  describe('updateProduct(product)', function () {
+    itReturnsPromise(() => testDb.updateProduct(testProducts[0]));
+
+    // query db to verify expected values are present for product where
+    // item_id = expectedValues.item_id
+    function testUpdate(expectedValues, done) {
+      return testDb
+        .updateProduct(expectedValues)
+        .then(() => testDbFixture
+          .query(`SELECT * FROM products WHERE item_id = ${expectedValues.item_id}`))
+        .then(data => expect(data[0]).to.include(expectedValues))
+        .then(() => done())
+        .catch(done);
     }
-    describeResult(1, 1);
-    describeResult(1, 20);
+    const testParam = { item_id: 1, stock_quantity: 5 };
+    it(
+      `updates stock quantity for item 1 to 5 when the product param is ${JSON.stringify(testParam)}`,
+      function (done) {
+        testUpdate(testParam, done);
+      },
+    );
+    it('updates all fields with values of product parameter', function (done) {
+      testUpdate({
+        item_id: 1,
+        stock_quantity: 8,
+        product_name: 'Magic Acorns',
+        price: 0.99,
+        sales: 2.97,
+      }, done);
+    });
   });
 
   describe('getLowInventory', function () {

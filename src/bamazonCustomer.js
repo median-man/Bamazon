@@ -16,9 +16,13 @@ function handlePurchase(input) {
     .then((product) => {
       // update database and display the transaction
       if (input.quantity > 0) {
-        const newQty = product.stock_quantity - input.quantity;
+        const updateData = {
+          item_id: input.id,
+          stock_quantity: product.stock_quantity - input.quantity,
+          sales: product.price * input.quantity,
+        };
         return db
-          .updateProductQty(input.id, newQty)
+          .updateProduct(updateData)
           .then(() => {
             customerView.renderTransaction(product, input.quantity);
             return true;
@@ -26,7 +30,6 @@ function handlePurchase(input) {
       }
       return null;
     })
-    // .then(cb)
     .catch((err) => { throw err; });
 }
 

@@ -18,7 +18,7 @@ function showLowInventory() {
 
 function updateInventory({ id, newQuantity }) {
   return db
-    .updateProductQty(id, newQuantity)
+    .updateProduct({ item_id: id, stock_quantity: newQuantity })
     .then(() => db.getProductById(id))
     .then(managerView.renderInventoryUpdate);
 }

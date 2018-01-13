@@ -6,7 +6,8 @@
   "scripts": {
     "test": "mocha",
     "start": "node index.js",
-    "manager": "node index.js manager"
+    "manager": "node index.js manager",
+    "super": "node index.js supervisor"
   },
   "repository": {
     "type": "git",

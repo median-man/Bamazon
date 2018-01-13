@@ -21,6 +21,13 @@ Manager interface provides the ability to do the following:
 * Edit the inventory of a product
 * Add a product
 
+### Supervisor interface
+Start the app with `npm run super`.
+
+Supervisor interface provides the ability to do the following:
+* View sales by department.
+* Add new department
+
 ## Installation
 1. Clone the repository from [GitHub](https://github.com/median-man/Bamazon)
 2. From the command line terminal, change to the repository directory.
@@ -49,8 +56,12 @@ Click on the image to see a demo video of the customer interface.
 * handle mysql connection errors gracefully (feat/mysql-con-errors)
 
 ### Supervisor Mode (feature request)
-* view sales by department (feat/super/dept-sales)
-* create department (feat/super/dept-create)
+* add departmentSales method to bamazonDb
+* add departmentSales view to supervisor app
+* add getNewDepartmentName to supervisor view
+* add addDepartment method to bamazonDb
+* view sales by department (feat/super)
+* create department (feat/super)
 
 ---
 Created by John Desrosiers. 2017

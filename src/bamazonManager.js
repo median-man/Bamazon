@@ -1,6 +1,7 @@
 const managerView = require('./managerView.js');
 const customerView = require('./customerView.js');
 const BamazonDB = require('./BamazonDB.js');
+const mainMenuQuestion = require('./mainMenu.js');
 
 const db = new BamazonDB();
 
@@ -56,7 +57,13 @@ function quit() {
 }
 function run() {
   managerView
-    .mainMenu()
+    .mainMenu([
+      { value: 'all', name: 'View products for sale' },
+      { value: 'low', name: 'View low inventory' },
+      { value: 'add', name: 'Add to inventory' },
+      { value: 'new', name: 'Add new product' },
+      { value: 'quit', name: 'Quit' },
+    ])
     .then(({ action }) => {
       if (action === 'all') return showAllProducts().then(run);
       if (action === 'low') return showLowInventory().then(run);

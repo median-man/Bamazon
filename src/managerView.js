@@ -64,7 +64,22 @@ function createListItem(product) {
   // string to display in the list
   result = `${prodName} | ${dept} | ${stock} | ${price}`;
   return id ? `${id} | ${result}` : result;
-  // return `${id} | ${prodName} | ${dept} | ${stock} | ${price}`;
+}
+
+// Accepts a department object or id and name parameters.
+// Returns a formatted string.
+function deptToString(dept, name) {
+  const separator = ' | ';
+  let values;
+  if (typeof dept === 'object') {
+    values = Object.values(dept);
+    values[2] = `$${padStart(values[2], 6)}`;
+  } else {
+    values = [dept, name];
+  }
+  values[0] = padStart(values[0], 3);
+  values[1] = toFixedLength(values[1], 15);
+  return values.join(separator);
 }
 
 function getProductList(products) {
@@ -100,16 +115,15 @@ function getItemName() {
   });
 }
 
-function getDepartmentName() {
+function getDepartmentName(departments) {
   return inquirer.prompt({
-    type: 'input',
+    type: 'list',
     name: 'department_name',
-    message: 'Enter the department name or C to cancel',
-    filter(input) {
-      if (input.toUpperCase() === 'C') return 'C';
-      return input;
-    },
-    validate: input => validateName(input, 15),
+    message: 'Select the department',
+    choices: departments.map(dept => ({
+      name: deptToString(dept.department_id, dept.name),
+      value: dept.name,
+    })).concat({ name: 'Cancel', value: 'C' }),
   });
 }
 
@@ -201,13 +215,13 @@ function addInventory(products, input, cancel) {
     });
 }
 
-function addProduct(product = {}, cancel) {
+function addProduct(departments, product = {}, cancel) {
   // handleResponse calls addProduct with cancel = true if user cancels. Else, calls
   // addProduct after adding input to product object
   const handleResponse = (answers) => {
-    if (Object.values(answers).includes('C')) return addProduct(null, true);
+    if (Object.values(answers).includes('C')) return addProduct(departments, null, true);
     Object.assign(product, answers);
-    return addProduct(product);
+    return addProduct(departments, product);
   };
 
   // resolves to false if user cancels
@@ -218,7 +232,7 @@ function addProduct(product = {}, cancel) {
     return getItemName().then(handleResponse);
   }
   if (typeof product.department_name === 'undefined') {
-    return getDepartmentName().then(handleResponse);
+    return getDepartmentName(departments).then(handleResponse);
   }
   if (typeof product.price === 'undefined') {
     return getPrice().then(handleResponse);
@@ -245,6 +259,7 @@ function renderInventoryUpdate(product) {
 module.exports = {
   addInventory,
   addProduct,
+  deptToString,
   getProductList,
   mainMenu,
   renderInventoryUpdate,

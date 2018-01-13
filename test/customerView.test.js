@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 const customerView = require('../src/customerView.js');
-const productData = require('./productData.json');
+const productData = require('./fixtures/productData.json');
 
 describe('customerView', function () {
   function itHasMethod(method) {

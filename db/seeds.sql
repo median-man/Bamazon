@@ -1,4 +1,19 @@
--- seed Bamazon DB
+-- Remove all data from Bamazon DB then add seed data.
+USE bamazon_DB;
+-- turn off safe update to delete without a where clause
+SET SQL_SAFE_UPDATES=0;
+TRUNCATE TABLE products;
+DELETE FROM departments;
+SET SQL_SAFE_UPDATES=1;
+
+INSERT INTO departments(name, over_head_costs)
+VALUES
+  ('Clothing', 2500),
+  ('Health', 1800),
+  ('Home', 2000),
+  ('Office', 2000),
+  ('Sports', 2400);
+
 INSERT INTO products(product_name, department_name, price, stock_quantity)
 VALUES
 	("Nostalgia Electrics BSET100CR 3 in 1 Breakfast Station", "Home", 69.99, 3),
@@ -15,4 +30,3 @@ VALUES
     ("Deer Rear with Bottle Opene", "Home", 12.99, 2),
     ("The Defibrillator Toaster", "Home", 27.99, 3),
     ("EMERGENCY MOUSTACHE KIT", "Health", 14.99, 8);
-    

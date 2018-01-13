@@ -1,9 +1,7 @@
--- script to create the Bamazon database and tables
-DROP DATABASE IF EXISTS bamazon_DB;
-CREATE DATABASE bamazon_DB;
+DROP DATABASE IF EXISTS bamazon_test_DB;
+CREATE DATABASE bamazon_test_DB;
 
-USE bamazon_DB;
-
+USE bamazon_test_DB;
 CREATE TABLE departments(
   department_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(15) NOT NULL UNIQUE,

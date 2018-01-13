@@ -8,12 +8,12 @@ Bamazon lists products from a database to a user (customer). The customer may se
 There are two interfaces to the app--Customer and Manager.
 
 ### Customer Interface
-Start the app with `node index.js`
+Start the app with `npm start`.
 
 Customer interface allows the products to be viewed and purchased.
 
 ### Manager Interface
-Start the app with passing 'manager' as an argument: `node index.js manager`.
+Start the app with `npm run manager`.
 
 Manager interface provides the ability to do the following:
 * View all products
@@ -43,6 +43,16 @@ Bamazon to connect to a MySql database.
 ## Demonstration Video
 Click on the image to see a demo video of the customer interface.
 [![Screenshot of Bamazon Demo](http://img.youtube.com/vi/oivuUEn2sls/0.jpg)](http://www.youtube.com/watch?v=oivuUEn2sls)
+
+## To Do
+* fix customer app hangs after completing a purchase (bug/purchase)
+* handle mysql connection errors gracefully (feat/mysql-con-errors)
+* create supervisor mode feature (feat/supervisor)
+* add product_sales column to products table (feat/supervisor/prod-sales)
+
+### Supervisor Mode (feature request)
+* view sales by department (feat/supervisor/dept-sales)
+* create department (feat/supervisor/dept-create)
 
 ---
 Created by John Desrosiers. 2017

@@ -1,6 +1,3 @@
-/*
-*   Import Modules
- */
 const BamazonDB = require('./BamazonDB.js');
 const customerView = require('./customerView.js');
 
@@ -24,6 +21,7 @@ function handlePurchase(input) {
           .updateProductQty(input.id, newQty)
           .then(() => {
             customerView.renderTransaction(product, input.quantity);
+            return true;
           });
       }
       return null;
@@ -69,7 +67,8 @@ function handleError(err) {
 function run() {
   // display a table of all items in products table and
   // instantiate productTable
-  return db.getTable()
+  return db
+    .getTable()
     .then((data) => {
       customerView.renderProducts(data);
 

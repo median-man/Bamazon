@@ -1,4 +1,22 @@
 const superView = require('./supervisorView.js');
+const BamazonDB = require('./BamazonDB.js');
+
+const db = new BamazonDB();
+
+// Display sales and profits grouped by department
+function deptSales() {
+  return db
+    // get department sales from the database
+    .departmentSales()
+    .then(data => data.map(row => Object.assign(
+      {},
+      row,
+      { total_profit: row.product_sales - row.over_head_costs },
+    )))
+
+    // display table
+    .then(data => superView.renderDeptSales(data));
+}
 
 function run() {
   superView
@@ -8,8 +26,9 @@ function run() {
       { value: 'quit', name: 'Quit' },
     ])
     .then(({ action }) => {
+      if (action === 'dept-sales') return deptSales().then(run);
+      if (action === 'quit') return db.connection.end();
       console.log(action);
-      if (action === 'quit') process.exit();
       return run();
     })
     .catch((err) => { throw err; });

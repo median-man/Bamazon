@@ -1,7 +1,6 @@
 const managerView = require('./managerView.js');
 const customerView = require('./customerView.js');
 const BamazonDB = require('./BamazonDB.js');
-const mainMenuQuestion = require('./mainMenu.js');
 
 const db = new BamazonDB();
 

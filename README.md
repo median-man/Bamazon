@@ -45,7 +45,6 @@ Click on the image to see a demo video of the customer interface.
 [![Screenshot of Bamazon Demo](http://img.youtube.com/vi/oivuUEn2sls/0.jpg)](http://www.youtube.com/watch?v=oivuUEn2sls)
 
 ## To Do
-* fix customer app hangs after completing a purchase (bug/purchase)
 * handle mysql connection errors gracefully (feat/mysql-con-errors)
 * create supervisor mode feature (feat/supervisor)
 * add product_sales column to products table (feat/supervisor/prod-sales)

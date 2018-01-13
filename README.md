@@ -45,13 +45,16 @@ Click on the image to see a demo video of the customer interface.
 [![Screenshot of Bamazon Demo](http://img.youtube.com/vi/oivuUEn2sls/0.jpg)](http://www.youtube.com/watch?v=oivuUEn2sls)
 
 ## To Do
+* create supervisor mode feature (feat/super)
 * handle mysql connection errors gracefully (feat/mysql-con-errors)
-* create supervisor mode feature (feat/supervisor)
-* add product_sales column to products table (feat/supervisor/prod-sales)
 
 ### Supervisor Mode (feature request)
-* view sales by department (feat/supervisor/dept-sales)
-* create department (feat/supervisor/dept-create)
+* Add products.product_sales field to db schema (feat/super)
+* Replace BamazonDB.updateProductQty with updateProduct. (feat/super)
+  * The method should accept a product object and update the product by the id key.
+  * When customer makes a purchase, the product sales should be updated.
+* view sales by department (feat/super/dept-sales)
+* create department (feat/super/dept-create)
 
 ---
 Created by John Desrosiers. 2017

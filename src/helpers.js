@@ -6,4 +6,9 @@ function validateNameInput(input, maxLength) {
   return true;
 }
 
+function filterTextInput(input) {
+  if (input.toUpperCase() === 'C') return 'C';
+  return input;
+}
+
 module.exports = { filterTextInput, validateNameInput };

@@ -3,6 +3,12 @@ const BamazonDB = require('./BamazonDB.js');
 
 const db = new BamazonDB();
 
+function addDepartment() {
+  // get department name from user
+  return superView
+    .getDeptName();
+}
+
 // Display sales and profits grouped by department
 function deptSales() {
   return db
@@ -27,6 +33,7 @@ function run() {
     ])
     .then(({ action }) => {
       if (action === 'dept-sales') return deptSales().then(run);
+      if (action === 'add-dept') return addDepartment().then(run);
       if (action === 'quit') return db.connection.end();
       console.log(action);
       return run();

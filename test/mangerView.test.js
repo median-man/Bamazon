@@ -65,25 +65,4 @@ describe('managerView', function () {
       includesAll(resultStr, [id, name]);
     });
   });
-
-  describe('validateQuantity', function () {
-    const { validateQuantity } = managerView;
-    function expectWhen(quantity, type) {
-      describe(`when quantity argument is ${quantity}`, function () {
-        if (type === 'string') {
-          it('returns a string', function () {
-            expect(validateQuantity(quantity)).to.be.a(type);
-          });
-        } else {
-          it('returns true', function () {
-            expect(validateQuantity('cancel')).to.be.true;
-          });
-        }
-      });
-    }
-    expectWhen('cancel', true);
-    expectWhen(1, true);
-    expectWhen(NaN, 'string');
-    expectWhen(-1, 'string');
-  });
 });

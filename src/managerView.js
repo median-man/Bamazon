@@ -1,7 +1,7 @@
 const inquirer = require('inquirer');
 const { findProduct, printToConsole, renderProducts } = require('./customerView.js');
 const mainMenuQuestion = require('./mainMenu.js');
-const { validateNameInput } = require('./helpers.js');
+const { filterTextInput, isNumberGreaterOrEqual, validateNameInput } = require('./helpers.js');
 
 function precisionRound(number, precision) {
   const factor = 10 ** precision;
@@ -73,21 +73,13 @@ function getProductList(products) {
   }));
 }
 
-function validateQuantity(quantity) {
-  if (quantity < 0 || Number.isNaN(quantity)) return 'Invalid amount';
-  return true;
-}
-
 function getItemName() {
   return inquirer.prompt({
     type: 'input',
     name: 'product_name',
     message: 'Enter the product name or C to cancel',
     validate: input => validateNameInput(input, 35),
-    filter(input) {
-      if (input.toUpperCase() === 'C') return 'C';
-      return input;
-    },
+    filter: filterTextInput,
   });
 }
 
@@ -113,11 +105,7 @@ function getPrice() {
       const price = parseFloat(input, 10);
       return precisionRound(price, 2);
     },
-    validate(input) {
-      if (Number.isNaN(input)) return 'Enter a number';
-      if (input < 0) return 'Cannot be negative.';
-      return true;
-    },
+    validate: input => isNumberGreaterOrEqual(input, 0),
   });
 }
 
@@ -130,12 +118,7 @@ function getQuantity() {
       if (quantity.toLowerCase() === 'c') return 'C';
       return parseFloat(quantity, 10);
     },
-    validate(quantity) {
-      if (quantity === 'C') return true;
-      if (Number.isNaN(quantity)) return 'Invalid choice';
-      if (quantity < 0) return 'Quantity must be >= 0';
-      return true;
-    },
+    validate: input => isNumberGreaterOrEqual(input, 0),
   });
 }
 
@@ -244,5 +227,4 @@ module.exports = {
   getProductList,
   mainMenu,
   renderInventoryUpdate,
-  validateQuantity,
 };

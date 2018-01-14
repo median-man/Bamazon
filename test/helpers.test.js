@@ -1,5 +1,5 @@
 const { expect } = require('chai');
-const { validateNameInput } = require('../src/helpers.js');
+const { isNumberGreaterOrEqual, validateNameInput } = require('../src/helpers.js');
 
 describe('helpers.validateNameInput', function () {
   it('is a function', function () {
@@ -27,4 +27,24 @@ describe('helpers.validateNameInput', function () {
     expect(validateNameInput('C')).to.be.true;
     expect(validateNameInput('c')).to.be.true;
   });
+});
+
+describe('helpers.isNumberGreaterOrEqual', function () {
+  function expectWhen(quantity, type) {
+    describe(`when quantity argument is ${quantity}`, function () {
+      if (type === 'string') {
+        it('returns a string', function () {
+          expect(isNumberGreaterOrEqual(quantity, 0)).to.be.a(type);
+        });
+      } else {
+        it('returns true', function () {
+          expect(isNumberGreaterOrEqual('cancel', 0)).to.be.true;
+        });
+      }
+    });
+  }
+  expectWhen('cancel', true);
+  expectWhen(1, true);
+  expectWhen(NaN, 'string');
+  expectWhen(-1, 'string');
 });

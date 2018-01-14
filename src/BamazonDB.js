@@ -64,4 +64,20 @@ BamazonDB.prototype.departmentSales = function getDepartmentSalesTotals() {
   return queryPromise(this.connection, sql);
 };
 
+// Add new department and return the new department object or false if name is duplicate.
+BamazonDB.prototype.addDepartment = function addDepartment(department) {
+  let sql = 'INSERT INTO departments SET ?';
+  return queryPromise(this.connection, sql, department)
+    .then(({ insertId }) => {
+      sql = `SELECT * FROM departments WHERE department_id = ${insertId}`;
+      return queryPromise(this.connection, sql);
+    })
+    .then(data => data[0])
+    .catch((err) => {
+      // return false if entry is duplicate
+      if (err.code === 'ER_DUP_ENTRY') return false;
+      throw err;
+    });
+};
+
 module.exports = BamazonDB;

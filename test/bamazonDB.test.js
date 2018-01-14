@@ -353,4 +353,45 @@ describe('BamazonDB', function () {
       });
     });
   });
+
+  it('responds to addDepartment', function () {
+    expect(testDb).to.respondTo('addDepartment');
+  });
+
+  describe('addDepartment', function () {
+    const testDept = { name: 'Magic', over_head_costs: 300 };
+    const seededDept = { name: 'Sports', over_head_costs: 200 };
+
+    itReturnsPromise(() => testDb.addDepartment(testDept));
+
+    let testDescription = 'returns department object for new department when ';
+    testDescription += `the department parameter is ${JSON.stringify(testDept)}`;
+    it(testDescription, function (done) {
+      testDb
+        .addDepartment(testDept)
+        .then((data) => {
+          expect(data).to.have.keys(['department_id', 'name', 'over_head_costs']);
+          expect(data).to.include(testDept);
+          done();
+        })
+        .catch(done);
+    });
+
+    it('returns false when the name of the department is not unique', function (done) {
+      testDb
+        .addDepartment(seededDept)
+        .then((data) => {
+          expect(data).to.be.false;
+          done();
+        })
+        .catch(done);
+    });
+
+    it('rejects the promise when the department object has no name paramteter', function (done) {
+      testDb
+        .addDepartment({})
+        .then(() => done('Expected promise to be rejected.'))
+        .catch(() => done());
+    });
+  });
 });

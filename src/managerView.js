@@ -1,6 +1,7 @@
 const inquirer = require('inquirer');
 const { findProduct, printToConsole, renderProducts } = require('./customerView.js');
 const mainMenuQuestion = require('./mainMenu.js');
+const { validateNameInput } = require('./helpers.js');
 
 function precisionRound(number, precision) {
   const factor = 10 ** precision;
@@ -72,14 +73,6 @@ function getProductList(products) {
   }));
 }
 
-function validateName(input, maxLength) {
-  if (input.toUpperCase() === 'C') return true;
-  if (!/[a-z]/i.test(input)) return 'Input must contain a letter.';
-  if (input.length < 2) return 'Must have at least 2 characters';
-  if (input.length > maxLength) return `Must contain ${maxLength} or fewer characters.`;
-  return true;
-}
-
 function validateQuantity(quantity) {
   if (quantity < 0 || Number.isNaN(quantity)) return 'Invalid amount';
   return true;
@@ -90,7 +83,7 @@ function getItemName() {
     type: 'input',
     name: 'product_name',
     message: 'Enter the product name or C to cancel',
-    validate: input => validateName(input, 35),
+    validate: input => validateNameInput(input, 35),
     filter(input) {
       if (input.toUpperCase() === 'C') return 'C';
       return input;
@@ -251,6 +244,5 @@ module.exports = {
   getProductList,
   mainMenu,
   renderInventoryUpdate,
-  validateName,
   validateQuantity,
 };

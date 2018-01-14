@@ -86,32 +86,4 @@ describe('managerView', function () {
     expectWhen(NaN, 'string');
     expectWhen(-1, 'string');
   });
-  describe('validateName', function () {
-    const { validateName } = managerView;
-    it('is a function', function () {
-      expect(validateName).to.be.a('function');
-    });
-    function expectString(input, msg) {
-      it(`returns a string when ${msg || `input is "${input}"`}`, function () {
-        expect(validateName(input, 35)).to.be.a('string');
-      });
-    }
-    describe('valid input must be a a string with a length of at least 2', function () {
-      it('returns true when input is "Cherlindrea\'s wand"', function () {
-        expect(validateName('Cherlindrea\'s wand 24', 25)).to.be.true;
-      });
-      expectString('a', 'input is an empty string');
-    });
-    describe('valid input must conatain at least 1 letter from the alphabet', function () {
-      expectString('351', 10);
-    });
-    describe('valid input must not be longer than length paremter', function () {
-      const testString = 'test'.repeat(9);
-      expectString(testString, `input string has a length of ${testString.length}`);
-    });
-    it('return true when input is "C" and ignores case', function () {
-      expect(validateName('C')).to.be.true;
-      expect(validateName('c')).to.be.true;
-    });
-  });
 });

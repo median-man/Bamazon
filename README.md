@@ -52,14 +52,7 @@ Click on the image to see a demo video of the customer interface.
 [![Screenshot of Bamazon Demo](http://img.youtube.com/vi/oivuUEn2sls/0.jpg)](http://www.youtube.com/watch?v=oivuUEn2sls)
 
 ## To Do
-* create supervisor mode feature (feat/super)
 * handle mysql connection errors gracefully (feat/mysql-con-errors)
-
-### Supervisor Mode (feature request)
-* add getNewDepartmentName to supervisor view
-* add addDepartment method to bamazonDb
-* view sales by department (feat/super)
-* create department (feat/super)
 
 ---
 Created by John Desrosiers. 2017

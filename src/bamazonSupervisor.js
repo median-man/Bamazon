@@ -6,7 +6,22 @@ const db = new BamazonDB();
 function addDepartment() {
   // get department name from user
   return superView
-    .getDeptName();
+    .getNewDept()
+    .then((input) => {
+      if (!input) return false;
+      return db
+        .addDepartment(input)
+        .then((newDept) => {
+          if (newDept) {
+            return `Succesfully added ${newDept.name} to departments`;
+          }
+          return 'Department already exists.';
+        })
+        .then(superView.printToConsole);
+    })
+
+    // do nothing if an error occurs
+    .catch(() => null);
 }
 
 // Display sales and profits grouped by department
@@ -21,7 +36,7 @@ function deptSales() {
     )))
 
     // display table
-    .then(data => superView.renderDeptSales(data));
+    .then(data => superView.renderDeptSales(data)).catch(console.error);
 }
 
 function run() {
